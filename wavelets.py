@@ -24,7 +24,10 @@ class Wavelets(object):
 
 
 class WaveletAnalysis(object):
-    def __init__(self, x):
+    def __init__(self, x, dt=1):
         """Arguments:
             x - 1 dimensional input signal
+            dt - sample spacing
         """
+
+
