@@ -97,13 +97,14 @@ class WaveletAnalysis(object):
             dt - sample spacing
         """
         self.x = x
+        self.N = len(x)
         self.dt = dt
         self.dj = dj
-        self.wavelet = getattr(Wavelets, 'wavelet')
+        self.wavelet = getattr(Wavelets, wavelet)
 
     @property
     def fourier_period(self):
-        getattr(self.wavelet, 'fourier_period')
+        return getattr(self.wavelet, 'fourier_period')
 
     @property
     def s0(self):
