@@ -3,7 +3,9 @@ from __future__ import division
 from functools import wraps
 
 import numpy as np
+import scipy
 import scipy.signal
+import scipy.optimize
 
 
 class Wavelets(object):
@@ -64,9 +66,21 @@ class Wavelets(object):
     # aka Derivitive Of Gaussian order 2, mexican hat or marr
     dog2 = ricker
 
+    # Fourier wavelengths
+    def fourier_period_morlet(s, w0=5):
+        """Equivalent fourier period of morlet"""
+        return 4 * np.pi * s / (w0 + (2 + w0 ** 2) ** .5)
+
+    def fourier_period_dog2(s):
+        """Equivalent fourier period of ricker / dog2 / mexican hat."""
+        return 2 * np.pi * s / (5 / 2) ** .5
+
+    morlet.fourier_period = fourier_period_morlet
+    ricker.fourier_period = fourier_period_dog2
+
 
 class WaveletAnalysis(object):
-    def __init__(self, x, dt=1, dj=0.125):
+    def __init__(self, x, dt=1, dj=0.125, wavelet='morlet'):
         """Arguments:
             x - 1 dimensional input signal
             dt - sample spacing
@@ -74,6 +88,21 @@ class WaveletAnalysis(object):
         self.x = x
         self.dt = dt
         self.dj = dj
+        self.wavelet = getattr(Wavelets, 'wavelet')
+
+    @property
+    def fourier_period(self):
+        getattr(self.wavelet, 'fourier_period')
+
+    @property
+    def s0(self):
+        """Find the smallest resolvable scale by finding where the
+        equivalent fourier period is equal to 2 * dt. For a Morlet
+        wavelet, this is roughly 1.
+        """
+        def f(s):
+            return self.fourier_period(s) - 2 * self.dt
+        return scipy.optimize.fsolve(f, 1)[0]
 
     def scales(self):
         """Form a set of scales to use in the wavelet transform.
@@ -102,7 +131,7 @@ class WaveletAnalysis(object):
         dj = self.dj
         # smallest resolvable scale, chosen so that the equivalent
         # fourier period is approximately 2dt
-        s0 = 2 * self.dt
+        s0 = self.s0
 
         # Largest scale
         J = int((1 / dj) * np.log2(self.N * self.dt / s0))
