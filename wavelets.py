@@ -152,5 +152,5 @@ class WaveletAnalysis(object):
         # Largest scale
         J = int((1 / dj) * np.log2(self.N * self.dt / s0))
 
-        sj = s0 * 2 ** np.arange(0, J + 1)
+        sj = s0 * 2 ** (dj * np.arange(0, J + 1))
         return sj
