@@ -156,3 +156,15 @@ class WaveletAnalysis(object):
 
         sj = s0 * 2 ** (dj * np.arange(0, J + 1))
         return sj
+
+
+# TODO: cone of influence
+# TODO: does scipy cwt pad the array with zeroes up to next power of two in length?
+# uses signaltools.convolve, which uses correlate
+# for modes other than 'valid', correlate zero pads but only to
+# match the arrays. correlate calls sigtools._correlateND which is a
+# C object
+
+# It seems that scipy.cwt is using the convolution method of
+# calculating the wavelet transform, rather than the fourier
+# transform method used in Terrence and Compo
