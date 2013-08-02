@@ -8,6 +8,48 @@ import scipy.signal
 import scipy.optimize
 
 
+def fft_cwt(data, wavelet, widths):
+    """Continuous wavelet transform using the fourier transform
+    convolution as used in Terrence and Compo.
+
+    (as opposed to the direct convolution method used by
+    scipy.signal.cwt)
+
+    *This method is over 10x faster than the scipy default.*
+
+    Performs a continuous wavelet transform on `data`,
+    using the `wavelet` function. A CWT performs a convolution
+    with `data` using the `wavelet` function, which is characterized
+    by a width parameter and length parameter.
+
+    Parameters
+    ----------
+    data : (N,) ndarray
+        data on which to perform the transform.
+    wavelet : function
+        Wavelet function, which should take 2 arguments.
+        The first argument is the number of points that the returned vector
+        will have (len(wavelet(width,length)) == length).
+        The second is a width parameter, defining the size of the wavelet
+        (e.g. standard deviation of a gaussian). See `ricker`, which
+        satisfies these requirements.
+    widths : (M,) sequence
+        Widths to use for transform.
+
+    Returns
+    -------
+    cwt: (M, N) ndarray
+        Will have shape of (len(data), len(widths)).
+
+    """
+    output = np.zeros((len(widths), len(data)))
+    for ind, width in enumerate(widths):
+        wavelet_data = wavelet(min(10 * width, len(data)), width)
+        output[ind, :] = scipy.signal.fftconvolve(data, wavelet_data,
+                                                            mode='same')
+    return output
+
+
 class Wavelets(object):
     """Container for various wavelet basis functions.
 
