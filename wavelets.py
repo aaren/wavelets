@@ -1,3 +1,5 @@
+from __future__ import division
+
 from functools import wraps
 
 import numpy as np
@@ -64,10 +66,46 @@ class Wavelets(object):
 
 
 class WaveletAnalysis(object):
-    def __init__(self, x, dt=1):
+    def __init__(self, x, dt=1, dj=0.125):
         """Arguments:
             x - 1 dimensional input signal
             dt - sample spacing
         """
+        self.x = x
+        self.dt = dt
+        self.dj = dj
 
+    def scales(self):
+        """Form a set of scales to use in the wavelet transform.
 
+        For non-orthogonal wavelet analysis, one can use an
+        arbitrary set of scales.
+
+        It is convenient to write the scales as fractional powers of
+        two:
+
+            s_j = s_0 * 2 ** (j * dj), j = 0, 1, ..., J
+
+            J = (1 / dj) * log2(N * dt / s_0)
+
+        s0 - smallest resolvable scale
+        J - largest scale
+
+        choose s0 so that the equivalent Fourier period is 2 * dt.
+
+        The choice of dj depends on the width in spectral space of
+        the wavelet function. For the morlet, dj=0.5 is the largest
+        that still adequately samples scale. Smaller dj gives finer
+        scale resolution.
+        """
+        # resolution
+        dj = self.dj
+        # smallest resolvable scale, chosen so that the equivalent
+        # fourier period is approximately 2dt
+        s0 = 2 * self.dt
+
+        # Largest scale
+        J = int((1 / dj) * np.log2(self.N * self.dt / s0))
+
+        sj = s0 * 2 ** np.arange(0, J + 1)
+        return sj
