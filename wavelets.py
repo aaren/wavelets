@@ -7,6 +7,12 @@ import scipy.signal
 class Wavelets(object):
     """Container for various wavelet basis functions.
 
+    Sx.y are references to section x.y in Terrence and Compo,
+    A Practical Guide to Wavelet Analysis (BAMS, 1998)
+
+
+    #### Wavelet function requirements (S3.b) ####
+
     To be admissible as a wavelet, a function must:
 
     - have zero mean
