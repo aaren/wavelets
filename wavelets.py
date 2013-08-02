@@ -95,6 +95,8 @@ class WaveletAnalysis(object):
         """Arguments:
             x - 1 dimensional input signal
             dt - sample spacing
+            dj - scale resolution
+            wavelet - wavelet function to use
         """
         self.x = x
         self.N = len(x)
