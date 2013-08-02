@@ -119,6 +119,7 @@ class WaveletAnalysis(object):
             return self.fourier_period(s) - 2 * self.dt
         return scipy.optimize.fsolve(f, 1)[0]
 
+    @property
     def scales(self):
         """Form a set of scales to use in the wavelet transform.
 
