@@ -58,6 +58,17 @@ class Wavelets(object):
 
     The choice of wavelet function is not critical if one is only
     qualitatively interested in the wavelet power spectrum.
+
+    ### Equivalent Fourier period (S3.h) ###
+
+    The peak wavelet response does not necessarily occur at 1 / s.
+
+    If we wish to compare wavelet spectra at different scales with
+    each other and with fourier modes, we need a common set of
+    units.
+
+    The equivalent fourier period is defined as where the wavelet
+    power spectrum reaches its maximum and can be found analytically.
     """
     # morlet wavelet
     morlet = scipy.signal.morlet
