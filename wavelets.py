@@ -104,6 +104,9 @@ class WaveletAnalysis(object):
 
     @property
     def fourier_period(self):
+        """Return a function that calculates the equivalent fourier
+        period as a function of scale.
+        """
         return getattr(self.wavelet, 'fourier_period')
 
     @property
