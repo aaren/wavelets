@@ -42,7 +42,8 @@ def fft_cwt(data, wavelet, widths):
         Will have shape of (len(data), len(widths)).
 
     """
-    output = np.zeros((len(widths), len(data)))
+    # wavelets can be complex so output is complex
+    output = np.zeros((len(widths), len(data)), dtype=np.complex)
     for ind, width in enumerate(widths):
         wavelet_data = wavelet(min(10 * width, len(data)), width)
         output[ind, :] = scipy.signal.fftconvolve(data, wavelet_data,
