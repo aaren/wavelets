@@ -320,14 +320,14 @@ class WaveletAnalysis(object):
         return sj
 
     def w(self, k):
-        """Angular frequency as a function of wavenumber.
+        """Angular frequency as a function of fourier index.
 
         See eq5 of TC.
         """
         res = 2 * np.pi * k / (self.N * self.dt)
-        if k <= N / 2:
+        if k <= self.N / 2:
             return res
-        elif k > N / 2:
+        elif k > self.N / 2:
             return -res
 
     @property
