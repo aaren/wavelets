@@ -51,7 +51,7 @@ def fft_cwt(data, wavelet, widths):
 
 def morlet(M=None, s=1.0, w=6.0, complete=True):
     """
-    Complex Morlet wavelet.
+    Complex Morlet wavelet, centred at zero.
 
     Parameters
     ----------
