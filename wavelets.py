@@ -210,6 +210,39 @@ class WaveletAnalysis(object):
         elif k > N / 2:
             return -res
 
+    def reconstruction(self):
+        """Reconstruct the original signal from the wavelet
+        transform. See S3.i.
+
+        For non-orthogonal wavelet functions, it is possible to
+        reconstruct the original time series using an arbitrary
+        wavelet function. The simplest is to use a delta function.
+
+        The reconstructed time series is found as the sum of the
+        real part of the wavelet transform over all scales,
+
+        x_n = (dj * dt^(1/2)) / (C_d * Y_0(0)) \
+                * Sum_(j=0)^J { Re(W_n(s_j)) / s_j^(1/2) }
+
+        where the factor C_d comes from the recontruction of a delta
+        function from its wavelet transform using the wavelet
+        function Y_0. This C_d is a constant for each wavelet
+        function.
+        """
+        dj = self.dj
+        dt = self.dt
+        C_d = self.C_d
+        # TODO: is wavelet centred properly?
+        Y_0 = self.wavelet
+        # TODO: write the wavelet transform
+        W_n = self.wavelet_transform
+        s = np.expand_dims(self.scales, 1)
+
+        real_sum = np.sum(W_n.real / s ** .5, axis=0)
+        x_n = real_sum * (dj * dt ** .5 / (C_d * Y_0(0)))
+        return x_n
+
+
 
 # TODO: cone of influence
 # TODO: does scipy cwt pad the array with zeroes up to next power of two in length?
