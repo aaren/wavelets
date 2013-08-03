@@ -333,7 +333,7 @@ class WaveletAnalysis(object):
     @property
     def wavelet_transform(self):
         """Calculate the wavelet transform."""
-        return self.cwt(self.x, self.wavelet, self.widths)
+        return self.cwt(self.x, self.wavelet, self.scales)
 
     def reconstruction(self):
         """Reconstruct the original signal from the wavelet
