@@ -249,6 +249,63 @@ class WaveletAnalysis(object):
         x_n = real_sum * (dj * dt ** .5 / (C_d * Y_0(0)))
         return x_n
 
+    def C_d(self):
+        """Constant used in reconstruction of data from delta
+        wavelet function. See self.reconstruction and S3.i.
+
+        To derive C_d for a new wavelet function, first assume a
+        time series with a delta function at time n=0, given by x_n
+        = d_n0. This time series has a Fourier transform x_k = 1 /
+        N, constant over k.
+
+        Substituting x_k into eq4 at n=0, the wavelet transform
+        becomes
+
+            W_d(s) = (1 / N) Sum[k=0][N-1] { Y'*(s, w_k) }
+
+        The reconstruction then gives
+
+            C_d = (dj * dt^(1/2)) / Y_0(0) \
+                    * Sum_(j=0)^J { Re(W_d(s_j)) / s_j^(1/2) }
+
+        C_d is scale independent and a constant for each wavelet
+        function.
+        """
+        dj = self.dj
+        dt = self.dt
+        C_d = 1
+        # TODO: is wavelet centred properly?
+        Y_0 = self.wavelet
+        # TODO: write the wavelet transform
+        W_d = self.wavelet_transform_delta
+        s = np.expand_dims(self.scales, 1)
+
+        real_sum = np.sum(W_d.real / s ** .5, axis=0)
+        C_d = real_sum * (dj * dt ** .5 / (C_d * Y_0(0)))
+        return C_d
+
+    @property
+    def wavelet_transform_delta(self):
+        """Calculate the delta wavelet transform.
+
+        Returns an array of the transform computed over the scales.
+        """
+        N = self.N
+        # wavelet as function of (s, w_k)
+        Y_ = self.wavelet_freq
+        k = np.arange(N)
+        s = self.scales
+        K, S = np.meshgrid(k, s)
+
+        # compute Y_ over all s, w_k and sum over k
+        W_d = (1 / N) * np.sum(Y_(S, self.w_k(K)), axis=0)
+
+        return W_d
+
+
+
+
+
 
 
 # TODO: cone of influence
