@@ -111,6 +111,8 @@ def morlet(M=None, s=1.0, w=6.0, complete=True):
 
     output *= np.exp(-0.5 * (x**2)) * np.pi**(-0.25)
 
+    # TODO: normalise by s**-.5?
+
     return output
 
 
@@ -152,14 +154,18 @@ def ricker(points=None, s=1.0):
 
     """
     M = points or 10 * s
-    A = 2 / (np.sqrt(3 * a) * (np.pi**0.25))
 
     t = np.arange((-M + 1) / 2., (M + 1) / 2.)
     x = t / s
-    mod = (1 - x ** 2)
-    gauss = np.exp(-x ** 2 / 2))
-    total = A * mod * gauss
-    return total
+
+    # this prefactor comes from the gamma function in
+    # Derivative of Gaussian. gamma(n) = (n-1)!
+    A = np.pi ** -0.25 * np.sqrt(4 / 3)
+
+    output = A * (1 - x ** 2) * np.exp(-x ** 2 / 2)
+    # TODO: normalise by s**-.5?
+
+    return output
 
 
 class Wavelets(object):
