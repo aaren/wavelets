@@ -49,14 +49,16 @@ def fft_cwt(data, wavelet, widths):
                                                             mode='same')
     return output
 
-def morlet(M, s=1.0, w=6.0, complete=True):
+def morlet(M=None, s=1.0, w=6.0, complete=True):
     """
     Complex Morlet wavelet.
 
     Parameters
     ----------
     M : int
-        Length of the wavelet.
+        Length of the wavelet. Defaults to 10 * s, which will
+        include all the significant wavelet, but you want to cap
+        this at the length of the data vector you are working with.
     w : float
         Omega0. Default is 5
     s : float
@@ -97,6 +99,7 @@ def morlet(M, s=1.0, w=6.0, complete=True):
     by ``f = 2*s*w*r / M`` where r is the sampling rate.
 
     """
+    M = M or 10 * s
     t = np.arange((-M + 1) / 2., (M + 1) / 2.)
     x = t / s
 
