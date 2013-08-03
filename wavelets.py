@@ -210,3 +210,8 @@ class WaveletAnalysis(object):
 # It seems that scipy.cwt is using the convolution method of
 # calculating the wavelet transform, rather than the fourier
 # transform method used in Terrence and Compo
+
+# TODO: reconstruction (S3.i)
+# TODO: derive C_d for given wavelet
+# TODO: derive Y'(s,w) for given Y(t) (Y is wavelet)
+# TODO: w_k as function of k
