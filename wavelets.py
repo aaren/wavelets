@@ -199,6 +199,17 @@ class WaveletAnalysis(object):
         sj = s0 * 2 ** (dj * np.arange(0, J + 1))
         return sj
 
+    def w(self, k):
+        """Angular frequency as a function of wavenumber.
+
+        See eq5 of TC.
+        """
+        res = 2 * np.pi * k / (self.N * self.dt)
+        if k <= N / 2:
+            return res
+        elif k > N / 2:
+            return -res
+
 
 # TODO: cone of influence
 # TODO: does scipy cwt pad the array with zeroes up to next power of two in length?
@@ -214,4 +225,3 @@ class WaveletAnalysis(object):
 # TODO: reconstruction (S3.i)
 # TODO: derive C_d for given wavelet
 # TODO: derive Y'(s,w) for given Y(t) (Y is wavelet)
-# TODO: w_k as function of k
