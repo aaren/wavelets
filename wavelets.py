@@ -62,7 +62,7 @@ def morlet(M=None, s=1.0, w=6.0, complete=True):
     w : float
         Omega0. Default is 5
     s : float
-        Scaling factor, windowed from ``-s*2*pi`` to ``+s*2*pi``. Default is 1.
+        Scaling factor. Default is 1.
     complete : bool
         Whether to use the complete or the standard version.
 
