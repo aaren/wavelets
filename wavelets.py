@@ -49,6 +49,10 @@ def fft_cwt(data, wavelet, widths):
                                                             mode='same')
     return output
 
+@wraps(scipy.signal.morlet)
+def morlet(M, s=1.0, w0=5.0, complete=False):
+    """Wrap scipy morlet function with arguments in the right order. """
+    return scipy.signal.morlet(M, w0, s, complete)
 
 class Wavelets(object):
     """Container for various wavelet basis functions.
