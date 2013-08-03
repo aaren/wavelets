@@ -322,3 +322,6 @@ class WaveletAnalysis(object):
 # TODO: reconstruction (S3.i)
 # TODO: derive C_d for given wavelet
 # TODO: derive Y'(s,w) for given Y(t) (Y is wavelet)
+
+# TODO: scipy morlet implementation is incorrect, need to swap
+# arguments around for feeding to cwt (make it like ricker)
