@@ -49,7 +49,7 @@ def fft_cwt(data, wavelet, widths):
                                                             mode='same')
     return output
 
-def morlet(M, s=1.0, w=1.0, complete=True):
+def morlet(M, s=1.0, w=6.0, complete=True):
     """
     Complex Morlet wavelet.
 
@@ -97,13 +97,15 @@ def morlet(M, s=1.0, w=1.0, complete=True):
     by ``f = 2*s*w*r / M`` where r is the sampling rate.
 
     """
-    x = linspace(-s * 2 * pi, s * 2 * pi, M)
-    output = exp(1j * w * x)
+    t = np.arange((-M + 1) / 2., (M + 1) / 2.)
+    x = t / s
+
+    output = np.exp(1j * w * x)
 
     if complete:
-        output -= exp(-0.5 * (w**2))
+        output -= np.exp(-0.5 * (w**2))
 
-    output *= exp(-0.5 * (x**2)) * pi**(-0.25)
+    output *= np.exp(-0.5 * (x**2)) * np.pi**(-0.25)
 
     return output
 
