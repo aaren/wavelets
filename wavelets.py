@@ -113,9 +113,9 @@ class Wavelets(object):
     power spectrum reaches its maximum and can be found analytically.
     """
     # morlet wavelet
-    morlet = scipy.signal.morlet
+    morlet = staticmethod(scipy.signal.morlet)
     # ricker wavelet
-    ricker = scipy.signal.ricker
+    ricker = staticmethod(scipy.signal.ricker)
     # aka Derivitive Of Gaussian order 2, mexican hat or marr
     dog2 = ricker
 
