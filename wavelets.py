@@ -109,6 +109,54 @@ def morlet(M, s=1.0, w=6.0, complete=True):
 
     return output
 
+
+def ricker(points, a):
+    """
+    Return a Ricker wavelet, also known as the "Mexican hat wavelet".
+
+    It models the function:
+
+        ``A (1 - x^2/a^2) exp(-t^2/a^2)``,
+
+    where ``A = 2/sqrt(3a)pi^1/3``.
+
+    Parameters
+    ----------
+    points : int
+        Number of points in `vector`. Default is ``10 * a``.
+        Will be centered around 0.
+    a : scalar
+        Width parameter of the wavelet.
+
+    Returns
+    -------
+    vector : (N,) ndarray
+        Array of length `points` in shape of ricker curve.
+
+    Examples
+    --------
+    >>> from scipy import signal
+    >>> import matplotlib.pyplot as plt
+
+    >>> points = 100
+    >>> a = 4.0
+    >>> vec2 = signal.ricker(points, a)
+    >>> print len(vec2)
+    100
+    >>> plt.plot(vec2)
+    >>> plt.show()
+
+    """
+    A = 2 / (np.sqrt(3 * a) * (np.pi**0.25))
+    wsq = a**2
+    vec = np.arange(0, points) - (points - 1.0) / 2
+    tsq = vec**2
+    mod = (1 - tsq / wsq)
+    gauss = np.exp(-tsq / (2 * wsq))
+    total = A * mod * gauss
+    return total
+
+
 class Wavelets(object):
     """Container for various wavelet basis functions.
 
