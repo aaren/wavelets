@@ -49,6 +49,7 @@ def fft_cwt(data, wavelet, widths):
                                                             mode='same')
     return output
 
+
 def morlet(M=None, s=1.0, w=6.0, complete=True):
     """
     Complex Morlet wavelet, centred at zero.
