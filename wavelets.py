@@ -145,6 +145,8 @@ class WaveletAnalysis(object):
         self.dt = dt
         self.dj = dj
         self.wavelet = getattr(Wavelets, wavelet)
+        # which continuous wavelet transform to use
+        self.cwt = fft_cwt
 
     @property
     def fourier_period(self):
@@ -209,6 +211,11 @@ class WaveletAnalysis(object):
             return res
         elif k > N / 2:
             return -res
+
+    @property
+    def wavelet_transform(self):
+        """Calculate the wavelet transform."""
+        return self.cwt(self.x, self.wavelet, self.widths)
 
     def reconstruction(self):
         """Reconstruct the original signal from the wavelet
