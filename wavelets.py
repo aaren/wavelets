@@ -171,10 +171,12 @@ def ricker(points=None, s=1.0):
 # aka Derivitive Of Gaussian order 2, mexican hat or marr
 dog2 = ricker
 
+
 # Fourier wavelengths
 def fourier_period_morlet(s, w0=5):
     """Equivalent fourier period of morlet"""
     return 4 * np.pi * s / (w0 + (2 + w0 ** 2) ** .5)
+
 
 def fourier_period_dog2(s):
     """Equivalent fourier period of ricker / dog2 / mexican hat."""
@@ -413,12 +415,6 @@ class WaveletAnalysis(object):
         W_d = (1 / N) * np.sum(Y_(S, self.w_k(K)), axis=0)
 
         return W_d
-
-
-
-
-
-
 
 # TODO: cone of influence
 
