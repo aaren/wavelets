@@ -168,10 +168,24 @@ def ricker(points=None, s=1.0):
 
     return output
 
+# aka Derivitive Of Gaussian order 2, mexican hat or marr
+dog2 = ricker
 
-class Wavelets(object):
-    """Container for various wavelet basis functions.
+# Fourier wavelengths
+def fourier_period_morlet(s, w0=5):
+    """Equivalent fourier period of morlet"""
+    return 4 * np.pi * s / (w0 + (2 + w0 ** 2) ** .5)
 
+def fourier_period_dog2(s):
+    """Equivalent fourier period of ricker / dog2 / mexican hat."""
+    return 2 * np.pi * s / (5 / 2) ** .5
+
+morlet.fourier_period = fourier_period_morlet
+ricker.fourier_period = fourier_period_dog2
+
+
+class WaveletAnalysis(object):
+    """
     Sx.y are references to section x.y in Terrence and Compo,
     A Practical Guide to Wavelet Analysis (BAMS, 1998)
 
@@ -231,28 +245,7 @@ class Wavelets(object):
     The equivalent fourier period is defined as where the wavelet
     power spectrum reaches its maximum and can be found analytically.
     """
-    # morlet wavelet
-    morlet = scipy.signal.morlet
-    # ricker wavelet
-    ricker = scipy.signal.ricker
-    # aka Derivitive Of Gaussian order 2, mexican hat or marr
-    dog2 = ricker
-
-    # Fourier wavelengths
-    def fourier_period_morlet(s, w0=5):
-        """Equivalent fourier period of morlet"""
-        return 4 * np.pi * s / (w0 + (2 + w0 ** 2) ** .5)
-
-    def fourier_period_dog2(s):
-        """Equivalent fourier period of ricker / dog2 / mexican hat."""
-        return 2 * np.pi * s / (5 / 2) ** .5
-
-    morlet.fourier_period = fourier_period_morlet
-    ricker.fourier_period = fourier_period_dog2
-
-
-class WaveletAnalysis(object):
-    def __init__(self, x, dt=1, dj=0.125, wavelet='morlet'):
+    def __init__(self, x, dt=1, dj=0.125, wavelet=morlet):
         """Arguments:
             x - 1 dimensional input signal
             dt - sample spacing
@@ -263,7 +256,7 @@ class WaveletAnalysis(object):
         self.N = len(x)
         self.dt = dt
         self.dj = dj
-        self.wavelet = getattr(Wavelets, wavelet)
+        self.wavelet = wavelet
         # which continuous wavelet transform to use
         self.cwt = fft_cwt
 
