@@ -192,6 +192,32 @@ morlet.fourier_period = fourier_period_morlet
 ricker.fourier_period = fourier_period_dog2
 
 
+# Frequency representation
+def frequency_morlet(s, w, w0=6):
+    """Frequency representation of morlet.
+
+    s - scale
+    w - angular frequency
+    """
+    # heaviside mock
+    Hw = 0.5 * (np.sign(w) + 1)
+    return np.pi ** .25 * Hw * np.exp(-(s * w - w0) ** 2 / 2)
+
+
+def frequency_ricker(s, w):
+    """Frequency representation of ricker.
+
+    s - scale
+    w - angular frequency
+    """
+    A = np.pi ** -0.25 * np.sqrt(4 / 3)
+    return A * (s * w) ** 2 * np.exp(-(s * w) ** 2 / 2)
+
+
+morlet.frequency = frequency_morlet
+ricker.frequency = frequency_ricker
+
+
 class WaveletAnalysis(object):
     """
     Sx.y are references to section x.y in Terrence and Compo,
@@ -422,7 +448,7 @@ class WaveletAnalysis(object):
         """
         N = self.N
         # wavelet as function of (s, w_k)
-        Y_ = self.wavelet_freq
+        Y_ = self.wavelet.frequency
         K = np.arange(N)
         s = self.scales
         K, S = np.meshgrid(k, s)
@@ -436,4 +462,3 @@ class WaveletAnalysis(object):
 
 # TODO: reconstruction (S3.i)
 # TODO: derive C_d for given wavelet
-# TODO: derive Y'(s,w) for given Y(t) (Y is wavelet)
