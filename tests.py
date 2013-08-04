@@ -6,7 +6,6 @@ import scipy.signal
 import matplotlib.pyplot as plt
 
 import wavelets
-from wavelets import Wavelets
 from wavelets import WaveletAnalysis
 
 
@@ -26,8 +25,8 @@ def test_compare_cwt():
     fft_cwt = wavelets.fft_cwt
 
     data = np.random.random(2000)
-    wave_anal = WaveletAnalysis(data, wavelet='ricker')
-    widths = wave_anal.scales[::-1]
+    wave_anal = WaveletAnalysis(data, wavelet=wavelets.ricker)
+    widths = wave_anal.scales()[::-1]
 
     morlet = scipy.signal.morlet
 
@@ -91,4 +90,4 @@ def test_reconstruction():
 
     Check within 10%.
     """
-    npt.assert_array_almost_equal(wa.data, wa.reconstruction, decimal=1)
+    npt.assert_array_almost_equal(wa.data, wa.reconstruction(), decimal=1)
