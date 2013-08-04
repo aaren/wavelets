@@ -8,7 +8,7 @@ import scipy.signal
 import scipy.optimize
 
 
-def fft_cwt(data, wavelet, widths, dt=1):
+def fft_cwt(data, wavelet, widths):
     """Continuous wavelet transform using the fourier transform
     convolution as used in Terrence and Compo.
 
@@ -47,7 +47,7 @@ def fft_cwt(data, wavelet, widths, dt=1):
     # wavelets can be complex so output is complex
     output = np.zeros((len(widths), len(data)), dtype=np.complex)
     for ind, width in enumerate(widths):
-        wavelet_data = (dt / width) ** .5 * wavelet(min(10 * width, len(data)), width)
+        wavelet_data = (1 / width) ** .5 * wavelet(min(10 * width, len(data)), width)
         output[ind, :] = scipy.signal.fftconvolve(data, wavelet_data,
                                                             mode='same')
     return output
@@ -271,18 +271,17 @@ class WaveletAnalysis(object):
         """
         return getattr(self.wavelet, 'fourier_period')
 
-    @property
-    def s0(self):
+    def s0(self, dt=None):
         """Find the smallest resolvable scale by finding where the
         equivalent fourier period is equal to 2 * dt. For a Morlet
         wavelet, this is roughly 1.
         """
+        dt = dt or self.dt
         def f(s):
-            return self.fourier_period(s) - 2 * self.dt
+            return self.fourier_period(s) - 2 * dt
         return scipy.optimize.fsolve(f, 1)[0]
 
-    @property
-    def scales(self):
+    def scales(self, dt=None):
         """Form a set of scales to use in the wavelet transform.
 
         For non-orthogonal wavelet analysis, one can use an
@@ -305,14 +304,15 @@ class WaveletAnalysis(object):
         that still adequately samples scale. Smaller dj gives finer
         scale resolution.
         """
+        dt = dt or self.dt
         # resolution
         dj = self.dj
         # smallest resolvable scale, chosen so that the equivalent
         # fourier period is approximately 2dt
-        s0 = self.s0
+        s0 = self.s0(dt=dt)
 
         # Largest scale
-        J = int((1 / dj) * np.log2(self.N * self.dt / s0))
+        J = int((1 / dj) * np.log2(self.N * dt / s0))
 
         sj = s0 * 2 ** (dj * np.arange(0, J + 1))
         return sj
@@ -331,7 +331,7 @@ class WaveletAnalysis(object):
     @property
     def wavelet_transform(self):
         """Calculate the wavelet transform."""
-        return self.cwt(self.x, self.wavelet, self.scales)
+        return self.cwt(self.x, self.wavelet, self.scales(dt=1))
 
     def reconstruction(self):
         """Reconstruct the original signal from the wavelet
