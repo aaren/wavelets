@@ -279,15 +279,15 @@ class WaveletAnalysis(object):
     The equivalent fourier period is defined as where the wavelet
     power spectrum reaches its maximum and can be found analytically.
     """
-    def __init__(self, x=np.random.random(1000), dt=1, dj=0.125, wavelet=morlet):
+    def __init__(self, data=np.random.random(1000), dt=1, dj=0.125, wavelet=morlet):
         """Arguments:
             x - 1 dimensional input signal
             dt - sample spacing
             dj - scale resolution
             wavelet - wavelet function to use
         """
-        self.x = x
-        self.N = len(x)
+        self.data = data
+        self.N = len(data)
         self.dt = dt
         self.dj = dj
         self.wavelet = wavelet
@@ -376,7 +376,7 @@ class WaveletAnalysis(object):
     @property
     def wavelet_transform(self):
         """Calculate the wavelet transform."""
-        return self.cwt(self.x, self.wavelet, self.scales(dt=1))
+        return self.cwt(self.data, self.wavelet, self.scales(dt=1))
 
     def reconstruction(self):
         """Reconstruct the original signal from the wavelet
