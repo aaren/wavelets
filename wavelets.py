@@ -8,7 +8,7 @@ import scipy.signal
 import scipy.optimize
 
 
-def fft_cwt(data, wavelet, widths):
+def fft_cwt(data, wavelet, widths, dt=1):
     """Continuous wavelet transform using the fourier transform
     convolution as used in Terrence and Compo.
 
@@ -35,6 +35,8 @@ def fft_cwt(data, wavelet, widths):
         satisfies these requirements.
     widths : (M,) sequence
         Widths to use for transform.
+    dt: float
+        sample spacing. defaults to 1 (data sample units).
 
     Returns
     -------
@@ -45,7 +47,7 @@ def fft_cwt(data, wavelet, widths):
     # wavelets can be complex so output is complex
     output = np.zeros((len(widths), len(data)), dtype=np.complex)
     for ind, width in enumerate(widths):
-        wavelet_data = wavelet(min(10 * width, len(data)), width)
+        wavelet_data = (dt / width) ** .5 * wavelet(min(10 * width, len(data)), width)
         output[ind, :] = scipy.signal.fftconvolve(data, wavelet_data,
                                                             mode='same')
     return output
