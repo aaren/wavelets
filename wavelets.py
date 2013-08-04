@@ -288,6 +288,7 @@ class WaveletAnalysis(object):
         """
         self.data = data
         self.N = len(data)
+        self.data_variance = self.data.var()
         self.dt = dt
         self.dj = dj
         self.wavelet = wavelet
@@ -457,6 +458,28 @@ class WaveletAnalysis(object):
         W_d = (1 / N) * np.sum(Y_(S, self.w_k(K)), axis=0)
 
         return W_d
+
+    @property
+    def wavelet_variance(self):
+        """Equivalent of Parseval's theorem for wavelets, S3.i.
+
+        The wavelet transform conserves total energy, i.e. variance.
+
+        Returns the variance of the input data.
+        """
+        dj = self.dj
+        dt = self.dt
+        C_d = self.C_d
+        N = self.N
+
+        A = dj * dt / (C_d * N)
+
+        power = np.abs(self.wavelet_transform) ** 2
+        s = np.expand_dims(self.scales(), 1)
+        var = A * np.sum(power / s)
+
+        return var
+
 
 # TODO: cone of influence
 
