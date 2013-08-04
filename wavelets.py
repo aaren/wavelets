@@ -321,16 +321,31 @@ class WaveletAnalysis(object):
         sj = s0 * 2 ** (dj * np.arange(0, J + 1))
         return sj
 
-    def w(self, k):
+    def w_k(self, k=None, dt=None):
         """Angular frequency as a function of fourier index.
+
+        If no k, returns an array of all the angular frequencies
+        calculated using the length of the data.
 
         See eq5 of TC.
         """
-        res = 2 * np.pi * k / (self.N * self.dt)
-        if k <= self.N / 2:
-            return res
-        elif k > self.N / 2:
-            return -res
+        dt = dt or self.dt
+        N = self.N
+        a = 2 * np.pi / (N * dt)
+        if k is None:
+            k = np.arange(N)
+            w_k = np.arange(N) * a
+            w_k[np.where(k > N // 2)] *= -1
+        elif type(k) is np.ndarray:
+            w_k = a * k
+            w_k[np.where(k > N // 2)] *= -1
+        else:
+            w_k = a * k
+            if k <= N // 2:
+                pass
+            elif k > N // 2:
+                w_k *= -1
+        return w_k
 
     @property
     def wavelet_transform(self):
@@ -408,7 +423,7 @@ class WaveletAnalysis(object):
         N = self.N
         # wavelet as function of (s, w_k)
         Y_ = self.wavelet_freq
-        k = np.arange(N)
+        K = np.arange(N)
         s = self.scales
         K, S = np.meshgrid(k, s)
 
