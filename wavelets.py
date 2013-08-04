@@ -167,7 +167,7 @@ def ricker(points=None, s=1.0):
     x = t / s
 
     # this prefactor comes from the gamma function in
-    # Derivative of Gaussian. gamma(n) = (n-1)!
+    # Derivative of Gaussian.
     A = np.pi ** -0.25 * np.sqrt(4 / 3)
 
     output = A * (1 - x ** 2) * np.exp(-x ** 2 / 2)
