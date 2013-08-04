@@ -33,6 +33,10 @@ def fft_cwt(data, wavelet, widths):
         The second is a width parameter, defining the size of the wavelet
         (e.g. standard deviation of a gaussian). See `ricker`, which
         satisfies these requirements.
+
+        The wavelet function should not be normalised by 1/sqrt(s),
+        i.e. it should have unit energy.
+
     widths : (M,) sequence
         Widths to use for transform.
     dt: float
@@ -114,8 +118,6 @@ def morlet(M=None, s=1.0, w=6.0, complete=True):
 
     output *= np.exp(-0.5 * (x**2)) * np.pi**(-0.25)
 
-    # TODO: normalise by s**-.5?
-
     return output
 
 
@@ -128,6 +130,9 @@ def ricker(points=None, s=1.0):
         ``A (1 - x^2/s^2) exp(-t^2/s^2)``,
 
     where ``A = 2/sqrt(3s)pi^1/3``.
+
+    Note that the energy of the return wavelet is not normalised
+    according to s.
 
     Parameters
     ----------
@@ -166,7 +171,6 @@ def ricker(points=None, s=1.0):
     A = np.pi ** -0.25 * np.sqrt(4 / 3)
 
     output = A * (1 - x ** 2) * np.exp(-x ** 2 / 2)
-    # TODO: normalise by s**-.5?
 
     return output
 
