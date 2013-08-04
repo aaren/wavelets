@@ -359,9 +359,7 @@ class WaveletAnalysis(object):
         dj = self.dj
         dt = self.dt
         C_d = self.C_d
-        # TODO: is wavelet centred properly?
         Y_0 = self.wavelet
-        # TODO: write the wavelet transform
         W_n = self.wavelet_transform
         s = np.expand_dims(self.scales, 1)
 
@@ -394,9 +392,6 @@ class WaveletAnalysis(object):
         dj = self.dj
         dt = self.dt
         C_d = 1
-        # TODO: is wavelet centred properly?
-        Y_0 = self.wavelet
-        # TODO: write the wavelet transform
         W_d = self.wavelet_transform_delta
         s = np.expand_dims(self.scales, 1)
 
