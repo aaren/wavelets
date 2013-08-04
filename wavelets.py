@@ -247,7 +247,7 @@ class WaveletAnalysis(object):
     The equivalent fourier period is defined as where the wavelet
     power spectrum reaches its maximum and can be found analytically.
     """
-    def __init__(self, x, dt=1, dj=0.125, wavelet=morlet):
+    def __init__(self, x=np.random.random(1000), dt=1, dj=0.125, wavelet=morlet):
         """Arguments:
             x - 1 dimensional input signal
             dt - sample spacing
