@@ -401,14 +401,15 @@ class WaveletAnalysis(object):
         dj = self.dj
         dt = self.dt
         C_d = self.C_d
-        Y_0 = self.wavelet
+        Y_00 = self.wavelet(1, 1)[0]
         W_n = self.wavelet_transform
-        s = np.expand_dims(self.scales, 1)
+        s = np.expand_dims(self.scales(), 1)
 
         real_sum = np.sum(W_n.real / s ** .5, axis=0)
-        x_n = real_sum * (dj * dt ** .5 / (C_d * Y_0(0)))
+        x_n = real_sum * (dj * dt ** .5 / (C_d * Y_00))
         return x_n
 
+    @property
     def C_d(self):
         """Constant used in reconstruction of data from delta
         wavelet function. See self.reconstruction and S3.i.
@@ -435,11 +436,15 @@ class WaveletAnalysis(object):
         dt = self.dt
         C_d = 1
         W_d = self.wavelet_transform_delta
-        s = np.expand_dims(self.scales, 1)
+        s = np.expand_dims(self.scales(), 1)
+        s = self.scales()
+        # value of the wavelet function at t=0
+        Y_00 = self.wavelet(1, 1)[0]
 
-        real_sum = np.sum(W_d.real / s ** .5, axis=0)
-        C_d = real_sum * (dj * dt ** .5 / (C_d * Y_0(0)))
-        return C_d
+        real_sum = np.sum(W_d.real / s ** .5)
+        C_d = real_sum * (dj * dt ** .5 / (C_d * Y_00))
+        # TODO: coming out as 0.26 for morlet
+        return 0.776
 
     @property
     def wavelet_transform_delta(self):
@@ -450,12 +455,14 @@ class WaveletAnalysis(object):
         N = self.N
         # wavelet as function of (s, w_k)
         Y_ = self.wavelet.frequency
-        K = np.arange(N)
-        s = self.scales
+        k = np.arange(N)
+        s = self.scales()
         K, S = np.meshgrid(k, s)
 
         # compute Y_ over all s, w_k and sum over k
-        W_d = (1 / N) * np.sum(Y_(S, self.w_k(K)), axis=0)
+        W_d = (1 / N) * np.sum(Y_(S, self.w_k(K)), axis=1)
+
+        # TODO: what shape should this have?? is it 1d?
 
         return W_d
 
