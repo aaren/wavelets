@@ -81,7 +81,8 @@ def test_var():
 
     Check that they are within 10%
     """
-    assert_almost_equal(wa.data_variance, wa.data_variance, places=1)
+    rdiff = 1 - wa.data_variance/ wa.wavelet_variance
+    assert_less(rdiff, 0.1)
 
 
 def test_reconstruction():
@@ -90,4 +91,9 @@ def test_reconstruction():
 
     Check within 10%.
     """
-    npt.assert_array_almost_equal(wa.data, wa.reconstruction(), decimal=1)
+    rdata = wa.reconstruction()
+    npt.assert_array_almost_equal(wa.data, rdata, decimal=1)
+
+    err = wa.data - rdata
+    assert(np.abs(err.mean()) < 0.05)
+    assert(err.std() < 0.05)
