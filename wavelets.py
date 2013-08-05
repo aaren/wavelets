@@ -287,6 +287,7 @@ class WaveletAnalysis(object):
             wavelet - wavelet function to use
         """
         self.data = data
+        self.anomaly_data = self.data - self.data.mean()
         self.N = len(data)
         self.data_variance = self.data.var()
         self.dt = dt
@@ -377,7 +378,7 @@ class WaveletAnalysis(object):
     @property
     def wavelet_transform(self):
         """Calculate the wavelet transform."""
-        return self.cwt(self.data, self.wavelet, self.scales(dt=1))
+        return self.cwt(self.anomaly_data, self.wavelet, self.scales(dt=1))
 
     def reconstruction(self):
         """Reconstruct the original signal from the wavelet
@@ -407,6 +408,10 @@ class WaveletAnalysis(object):
 
         real_sum = np.sum(W_n.real / s ** .5, axis=0)
         x_n = real_sum * (dj * dt ** .5 / (C_d * Y_00))
+
+        # add the mean back on (x_n is anomaly time series)
+        x_n += self.data.mean()
+
         return x_n
 
     @property
