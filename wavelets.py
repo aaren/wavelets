@@ -495,5 +495,4 @@ class WaveletAnalysis(object):
 
 # TODO: cone of influence
 
-# TODO: reconstruction (S3.i)
 # TODO: derive C_d for given wavelet
