@@ -467,7 +467,7 @@ class WaveletAnalysis(object):
         # compute Y_ over all s, w_k and sum over k
         W_d = (1 / N) * np.sum(Y_(S, self.w_k(K)), axis=1)
 
-        # TODO: what shape should this have?? is it 1d?
+        # N.B This W_d is 1D
 
         return W_d
 
