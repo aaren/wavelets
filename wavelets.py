@@ -426,8 +426,8 @@ class WaveletAnalysis(object):
         = d_n0. This time series has a Fourier transform x_k = 1 /
         N, constant over k.
 
-        Substituting x_k into eq4 at n=0, the wavelet transform
-        becomes
+        Substituting x_k into eq4 at n=0 (the peak of the delta
+        function), the wavelet transform becomes
 
             W_d(s) = (1 / N) Sum[k=0][N-1] { Y'*(s, w_k) }
 
