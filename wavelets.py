@@ -406,6 +406,7 @@ class WaveletAnalysis(object):
         C_d = self.C_d
         Y_00 = self.wavelet(1, 1)[0]
         W_n = self.wavelet_transform
+        # TODO: allow specification of scales
         s = np.expand_dims(self.scales(), 1)
 
         real_sum = np.sum(W_n.real / s ** .5, axis=0)
