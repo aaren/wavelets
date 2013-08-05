@@ -285,6 +285,7 @@ class WaveletAnalysis(object):
             dt - sample spacing
             dj - scale resolution
             wavelet - wavelet function to use
+            TODO: allow override s0
         """
         self.data = data
         self.anomaly_data = self.data - self.data.mean()
@@ -349,6 +350,7 @@ class WaveletAnalysis(object):
         sj = s0 * 2 ** (dj * np.arange(0, J + 1))
         return sj
 
+    # TODO: use np.frompyfunc on this
     def w_k(self, k=None, dt=None):
         """Angular frequency as a function of fourier index.
 
