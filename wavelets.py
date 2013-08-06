@@ -57,169 +57,170 @@ def fft_cwt(data, wavelet, widths):
     return output
 
 
-# TODO: make morlet, ricker, etc. into classes
 # TODO: write wavelet functions as numpy ufunc
 # TODO: reimplement cwt to match mathematical ufunc wavelet functions
 # TODO: use ifft for cwt, rather than fftconvolve
-def morlet(M=None, s=1.0, w=6.0, complete=True):
-    """
-    Complex Morlet wavelet, centred at zero.
+class Morlet(object):
+    def __init__(self, w0=6):
+        self.w0 = w0
 
-    Parameters
-    ----------
-    M : int
-        Length of the wavelet. Defaults to 10 * s, which will
-        include all the significant wavelet, but you want to cap
-        this at the length of the data vector you are working with.
-    w : float
-        Omega0. Default is 5
-    s : float
-        Scaling factor. Default is 1.
-    complete : bool
-        Whether to use the complete or the standard version.
+    def __call__(self, *args, **kwargs):
+        return self.time_rep(*args, **kwargs)
 
-    Returns
-    -------
-    morlet : (M,) ndarray
+    def time_rep(self, M=None, s=1.0, complete=True):
+        """
+        Complex Morlet wavelet, centred at zero.
 
-    See Also
-    --------
-    scipy.signal.gausspulse
+        Parameters
+        ----------
+        M : int
+            Length of the wavelet. Defaults to 10 * s, which will
+            include all the significant wavelet, but you want to cap
+            this at the length of the data vector you are working with.
+        w : float
+            Omega0. Default is 5
+        s : float
+            Scaling factor. Default is 1.
+        complete : bool
+            Whether to use the complete or the standard version.
 
-    Notes
-    -----
-    The standard version::
+        Returns
+        -------
+        morlet : (M,) ndarray
 
-        pi**-0.25 * exp(1j*w*x) * exp(-0.5*(x**2))
+        See Also
+        --------
+        scipy.signal.gausspulse
 
-    This commonly used wavelet is often referred to simply as the
-    Morlet wavelet.  Note that this simplified version can cause
-    admissibility problems at low values of w.
+        Notes
+        -----
+        The standard version::
 
-    The complete version::
+            pi**-0.25 * exp(1j*w*x) * exp(-0.5*(x**2))
 
-        pi**-0.25 * (exp(1j*w*x) - exp(-0.5*(w**2))) * exp(-0.5*(x**2))
+        This commonly used wavelet is often referred to simply as the
+        Morlet wavelet.  Note that this simplified version can cause
+        admissibility problems at low values of w.
 
-    The complete version of the Morlet wavelet, with a correction
-    term to improve admissibility. For w greater than 5, the
-    correction term is negligible.
+        The complete version::
 
-    Note that the energy of the return wavelet is not normalised
-    according to s.
+            pi**-0.25 * (exp(1j*w*x) - exp(-0.5*(w**2))) * exp(-0.5*(x**2))
 
-    The fundamental frequency of this wavelet in Hz is given
-    by ``f = 2*s*w*r / M`` where r is the sampling rate.
+        The complete version of the Morlet wavelet, with a correction
+        term to improve admissibility. For w greater than 5, the
+        correction term is negligible.
 
-    """
-    M = M or 10 * s
-    t = np.arange((-M + 1) / 2., (M + 1) / 2.)
-    x = t / s
+        Note that the energy of the return wavelet is not normalised
+        according to s.
 
-    output = np.exp(1j * w * x)
+        The fundamental frequency of this wavelet in Hz is given
+        by ``f = 2*s*w*r / M`` where r is the sampling rate.
 
-    if complete:
-        output -= np.exp(-0.5 * (w**2))
+        """
+        M = M or 10 * s
+        w = self.w0
 
-    output *= np.exp(-0.5 * (x**2)) * np.pi**(-0.25)
+        t = np.arange((-M + 1) / 2., (M + 1) / 2.)
+        x = t / s
 
-    return output
+        output = np.exp(1j * w * x)
 
+        if complete:
+            output -= np.exp(-0.5 * (w**2))
 
-def ricker(points=None, s=1.0):
-    """
-    Return a Ricker wavelet, also known as the "Mexican hat wavelet".
+        output *= np.exp(-0.5 * (x**2)) * np.pi**(-0.25)
 
-    It models the function:
+        return output
 
-        ``A (1 - x^2/s^2) exp(-t^2/s^2)``,
+    # Fourier wavelengths
+    def fourier_period(self, s):
+        """Equivalent fourier period of morlet"""
+        return 4 * np.pi * s / (self.w0 + (2 + self.w0 ** 2) ** .5)
 
-    where ``A = 2/sqrt(3s)pi^1/3``.
+    # Frequency representation
+    def frequency_rep(self, s, w):
+        """Frequency representation of morlet.
 
-    Note that the energy of the return wavelet is not normalised
-    according to s.
-
-    Parameters
-    ----------
-    points : int
-        Number of points in `vector`. Default is ``10 * s``.
-        Will be centered around 0.
-    s : scalar
-        Width parameter of the wavelet.
-
-    Returns
-    -------
-    vector : (N,) ndarray
-        Array of length `points` in shape of ricker curve.
-
-    Examples
-    --------
-    >>> from scipy import signal
-    >>> import matplotlib.pyplot as plt
-
-    >>> points = 100
-    >>> a = 4.0
-    >>> vec2 = signal.ricker(points, a)
-    >>> print len(vec2)
-    100
-    >>> plt.plot(vec2)
-    >>> plt.show()
-
-    """
-    M = points or 10 * s
-
-    t = np.arange((-M + 1) / 2., (M + 1) / 2.)
-    x = t / s
-
-    # this prefactor comes from the gamma function in
-    # Derivative of Gaussian.
-    A = np.pi ** -0.25 * np.sqrt(4 / 3)
-
-    output = A * (1 - x ** 2) * np.exp(-x ** 2 / 2)
-
-    return output
-
-# aka Derivitive Of Gaussian order 2, mexican hat or marr
-dog2 = ricker
+        s - scale
+        w - angular frequency
+        """
+        # heaviside mock
+        Hw = 0.5 * (np.sign(w) + 1)
+        return np.pi ** .25 * Hw * np.exp(-(s * w - self.w0) ** 2 / 2)
 
 
-# Fourier wavelengths
-def fourier_period_morlet(s, w0=5):
-    """Equivalent fourier period of morlet"""
-    return 4 * np.pi * s / (w0 + (2 + w0 ** 2) ** .5)
+class Ricker(object):
+    def __init__(self):
+        pass
 
+    def __call__(self, *args, **kwargs):
+        return self.time_rep(*args, **kwargs)
 
-def fourier_period_dog2(s):
-    """Equivalent fourier period of ricker / dog2 / mexican hat."""
-    return 2 * np.pi * s / (5 / 2) ** .5
+    def time_rep(self, points=None, s=1.0):
+        """
+        Return a Ricker wavelet, also known as the "Mexican hat wavelet".
 
-morlet.fourier_period = fourier_period_morlet
-ricker.fourier_period = fourier_period_dog2
+        It models the function:
 
+            ``A (1 - x^2/s^2) exp(-t^2/s^2)``,
 
-# Frequency representation
-def frequency_morlet(s, w, w0=6):
-    """Frequency representation of morlet.
+        where ``A = 2/sqrt(3s)pi^1/3``.
 
-    s - scale
-    w - angular frequency
-    """
-    # heaviside mock
-    Hw = 0.5 * (np.sign(w) + 1)
-    return np.pi ** .25 * Hw * np.exp(-(s * w - w0) ** 2 / 2)
+        Note that the energy of the return wavelet is not normalised
+        according to s.
 
+        Parameters
+        ----------
+        points : int
+            Number of points in `vector`. Default is ``10 * s``.
+            Will be centered around 0.
+        s : scalar
+            Width parameter of the wavelet.
 
-def frequency_ricker(s, w):
-    """Frequency representation of ricker.
+        Returns
+        -------
+        vector : (N,) ndarray
+            Array of length `points` in shape of ricker curve.
 
-    s - scale
-    w - angular frequency
-    """
-    A = np.pi ** -0.25 * np.sqrt(4 / 3)
-    return A * (s * w) ** 2 * np.exp(-(s * w) ** 2 / 2)
+        Examples
+        --------
+        >>> from scipy import signal
+        >>> import matplotlib.pyplot as plt
 
+        >>> points = 100
+        >>> a = 4.0
+        >>> vec2 = signal.ricker(points, a)
+        >>> print len(vec2)
+        100
+        >>> plt.plot(vec2)
+        >>> plt.show()
 
-morlet.frequency = frequency_morlet
-ricker.frequency = frequency_ricker
+        """
+        M = points or 10 * s
+
+        t = np.arange((-M + 1) / 2., (M + 1) / 2.)
+        x = t / s
+
+        # this prefactor comes from the gamma function in
+        # Derivative of Gaussian.
+        A = np.pi ** -0.25 * np.sqrt(4 / 3)
+
+        output = A * (1 - x ** 2) * np.exp(-x ** 2 / 2)
+
+        return output
+
+    def fourier_period(self, s):
+        """Equivalent fourier period of ricker / dog2 / mexican hat."""
+        return 2 * np.pi * s / (5 / 2) ** .5
+
+    def frequency_rep(self, s, w):
+        """Frequency representation of ricker.
+
+        s - scale
+        w - angular frequency
+        """
+        A = np.pi ** -0.25 * np.sqrt(4 / 3)
+        return A * (s * w) ** 2 * np.exp(-(s * w) ** 2 / 2)
 
 
 class WaveletAnalysis(object):
@@ -283,7 +284,7 @@ class WaveletAnalysis(object):
     The equivalent fourier period is defined as where the wavelet
     power spectrum reaches its maximum and can be found analytically.
     """
-    def __init__(self, data=np.random.random(1000), dt=1, dj=0.125, wavelet=morlet):
+    def __init__(self, data=np.random.random(1000), dt=1, dj=0.125, wavelet=Morlet()):
         """Arguments:
             x - 1 dimensional input signal
             dt - sample spacing
@@ -384,7 +385,7 @@ class WaveletAnalysis(object):
     @property
     def wavelet_transform(self):
         """Calculate the wavelet transform."""
-        return self.cwt(self.anomaly_data, self.wavelet, self.scales(dt=1))
+        return self.cwt(self.anomaly_data, self.wavelet.time_rep, self.scales(dt=1))
 
     def reconstruction(self):
         """Reconstruct the original signal from the wavelet
@@ -408,7 +409,7 @@ class WaveletAnalysis(object):
         dj = self.dj
         dt = self.dt
         C_d = self.C_d
-        Y_00 = self.wavelet(1, 1)[0]
+        Y_00 = self.wavelet.time_rep(1, 1)[0]
         W_n = self.wavelet_transform
         # TODO: allow specification of scales
         s = np.expand_dims(self.scales(), 1)
@@ -451,7 +452,7 @@ class WaveletAnalysis(object):
         s = np.expand_dims(self.scales(), 1)
         s = self.scales()
         # value of the wavelet function at t=0
-        Y_00 = self.wavelet(1, 1)[0]
+        Y_00 = self.wavelet.time_rep(1, 1)[0]
 
         real_sum = np.sum(W_d.real / s ** .5)
         C_d = real_sum * (dj * dt ** .5 / (C_d * Y_00))
@@ -466,7 +467,7 @@ class WaveletAnalysis(object):
         """
         N = self.N
         # wavelet as function of (s, w_k)
-        Y_ = self.wavelet.frequency
+        Y_ = self.wavelet.frequency_rep
         k = np.arange(N)
         s = self.scales()
         K, S = np.meshgrid(k, s)
