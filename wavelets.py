@@ -51,13 +51,15 @@ def fft_cwt(data, wavelet, widths):
     # wavelets can be complex so output is complex
     output = np.zeros((len(widths), len(data)), dtype=np.complex)
     for ind, width in enumerate(widths):
-        wavelet_data = (1 / width) ** .5 * wavelet(min(10 * width, len(data)), width)
+        # number of points needed to capture wavelet
+        M = 10 * width
+        t = np.arange((-M + 1) / 2., (M + 1) / 2.)
+        wavelet_data = (1 / width) ** .5 * wavelet(t, width)
         output[ind, :] = scipy.signal.fftconvolve(data, wavelet_data,
                                                             mode='same')
     return output
 
 
-# TODO: write wavelet functions as numpy ufunc
 # TODO: reimplement cwt to match mathematical ufunc wavelet functions
 # TODO: use ifft for cwt, rather than fftconvolve
 class Morlet(object):
@@ -67,18 +69,15 @@ class Morlet(object):
     def __call__(self, *args, **kwargs):
         return self.time_rep(*args, **kwargs)
 
-    def time_rep(self, M=None, s=1.0, complete=True):
+    def time_rep(self, t, s=1.0, complete=True):
         """
         Complex Morlet wavelet, centred at zero.
 
         Parameters
         ----------
-        M : int
-            Length of the wavelet. Defaults to 10 * s, which will
-            include all the significant wavelet, but you want to cap
-            this at the length of the data vector you are working with.
-        w : float
-            Omega0. Default is 5
+        t : float
+            Time. If s is not specified, this can be used as the
+            non-dimensional time t/s.
         s : float
             Scaling factor. Default is 1.
         complete : bool
@@ -86,7 +85,7 @@ class Morlet(object):
 
         Returns
         -------
-        morlet : (M,) ndarray
+        complex: value of the morlet wavelet at the given time
 
         See Also
         --------
@@ -117,10 +116,8 @@ class Morlet(object):
         by ``f = 2*s*w*r / M`` where r is the sampling rate.
 
         """
-        M = M or 10 * s
         w = self.w0
 
-        t = np.arange((-M + 1) / 2., (M + 1) / 2.)
         x = t / s
 
         output = np.exp(1j * w * x)
@@ -156,7 +153,7 @@ class Ricker(object):
     def __call__(self, *args, **kwargs):
         return self.time_rep(*args, **kwargs)
 
-    def time_rep(self, points=None, s=1.0):
+    def time_rep(self, t, s=1.0):
         """
         Return a Ricker wavelet, also known as the "Mexican hat wavelet".
 
@@ -164,41 +161,24 @@ class Ricker(object):
 
             ``A (1 - x^2/s^2) exp(-t^2/s^2)``,
 
-        where ``A = 2/sqrt(3s)pi^1/3``.
+        where ``A = 2/sqrt(3)pi^1/3``.
 
         Note that the energy of the return wavelet is not normalised
         according to s.
 
         Parameters
         ----------
-        points : int
-            Number of points in `vector`. Default is ``10 * s``.
-            Will be centered around 0.
+        t : float
+            Time. If s is not specified, this can be used as the
+            non-dimensional time t/s.
         s : scalar
             Width parameter of the wavelet.
 
         Returns
         -------
-        vector : (N,) ndarray
-            Array of length `points` in shape of ricker curve.
-
-        Examples
-        --------
-        >>> from scipy import signal
-        >>> import matplotlib.pyplot as plt
-
-        >>> points = 100
-        >>> a = 4.0
-        >>> vec2 = signal.ricker(points, a)
-        >>> print len(vec2)
-        100
-        >>> plt.plot(vec2)
-        >>> plt.show()
+        float : value of the ricker wavelet at the given time
 
         """
-        M = points or 10 * s
-
-        t = np.arange((-M + 1) / 2., (M + 1) / 2.)
         x = t / s
 
         # this prefactor comes from the gamma function in
@@ -409,7 +389,7 @@ class WaveletAnalysis(object):
         dj = self.dj
         dt = self.dt
         C_d = self.C_d
-        Y_00 = self.wavelet.time_rep(1, 1)[0]
+        Y_00 = self.wavelet.time_rep(0)
         W_n = self.wavelet_transform
         # TODO: allow specification of scales
         s = np.expand_dims(self.scales(), 1)
@@ -452,7 +432,7 @@ class WaveletAnalysis(object):
         s = np.expand_dims(self.scales(), 1)
         s = self.scales()
         # value of the wavelet function at t=0
-        Y_00 = self.wavelet.time_rep(1, 1)[0]
+        Y_00 = self.wavelet.time_rep(0)
 
         real_sum = np.sum(W_d.real / s ** .5)
         C_d = real_sum * (dj * dt ** .5 / (C_d * Y_00))
