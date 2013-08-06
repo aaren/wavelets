@@ -57,6 +57,10 @@ def fft_cwt(data, wavelet, widths):
     return output
 
 
+# TODO: make morlet, ricker, etc. into classes
+# TODO: write wavelet functions as numpy ufunc
+# TODO: reimplement cwt to match mathematical ufunc wavelet functions
+# TODO: use ifft for cwt, rather than fftconvolve
 def morlet(M=None, s=1.0, w=6.0, complete=True):
     """
     Complex Morlet wavelet, centred at zero.
