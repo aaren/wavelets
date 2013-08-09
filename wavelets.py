@@ -32,8 +32,12 @@ def fft_cwt(data, wavelet, widths):
         (e.g. standard deviation of a gaussian). See `ricker`, which
         satisfies these requirements.
 
-        The wavelet function should not be normalised by 1/sqrt(s),
-        i.e. it should have unit energy.
+        The wavelet function, Y, should be such that
+        Int[-inf][inf](|Y|^2) = 1
+
+        It is then multiplied here by (dt / s) ^ (1/2), which gives
+        it unit energy. dt here is equal to 1 (as we are using the
+        index as the time coordinate) and s is the width.
 
     widths : (M,) sequence
         Widths to use for transform.
