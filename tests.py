@@ -100,3 +100,69 @@ def test_reconstruction():
     err = wa.data - rdata
     assert(np.abs(err.mean()) < 0.05)
     assert(err.std() < 0.05)
+
+
+def test_power_bias():
+    """See if the global wavelet spectrum is biased or not.
+
+    Wavelet transform a signal of 3 distinct fourier frequencies.
+
+    The power spectrum should contain peaks at the frequencies, all
+    of which should be the same height.
+    """
+    # implicit dt=1
+    x = np.arange(5000)
+
+    T1 = 20
+    T2 = 100
+    T3 = 500
+
+    w1 = 2 * np.pi / T1
+    w2 = 2 * np.pi / T2
+    w3 = 2 * np.pi / T3
+
+    signal = np.cos(w1 * x) + np.cos(w2 * x) + np.cos(w3 * x)
+
+    wa = WaveletAnalysis(signal, wavelet=wavelets.Morlet())
+
+    power = wa.global_wavelet_spectrum
+    power_biased = power * wa.scales()
+    freqs = wa.fourier_periods
+
+    fig, ax = plt.subplots(nrows=2)
+
+    ax_transform = ax[0]
+    fig_info = (r"Wavelet transform of "
+                r"$cos(2 \pi / {T1}) + cos(2 \pi / {T2}) + cos(2 \pi / {T3})$")
+    ax_transform.set_title(fig_info.format(T1=T1, T2=T2, T3=T3))
+    X, Y = np.meshgrid(x, wa.fourier_periods)
+    ax_transform.set_xlabel('time')
+    ax_transform.set_ylabel('fourier period')
+    ax_transform.set_ylim(10, 1000)
+    ax_transform.set_yscale('log')
+    ax_transform.contourf(X, Y, wa.wavelet_power, 100)
+
+    ax_power = ax[1]
+    ax_power.set_title('Global wavelet spectrum '
+                       '(estimator for power spectrum)')
+    ax_power.plot(freqs, power, 'k', label=r'norm by $s^{-1/2}$')
+    ax_power.set_xscale('log')
+    ax_power.set_xlim(10, 1000)
+    ax_power.set_xlabel('fourier period')
+    ax_power.set_ylabel(r'power / $\sigma^2$  normalise by $s^{-1}$')
+
+    ax_power_un = ax_power.twinx()
+    ax_power_un.plot(freqs, power_biased, 'r', label=r'norm by $s^{-1}$')
+    ax_power_un.set_xlim(10, 1000)
+    ax_power_un.set_ylabel(r'power / $\sigma^2$  uncorrected')
+    ax_power_un.set_yticklabels(ax_power_un.get_yticks(), color='r')
+
+    label = "T={0}"
+    for T in (T1, T2, T3):
+        ax_power.axvline(T)
+        ax_power.annotate(label.format(T), (T, 1))
+
+    fig.tight_layout()
+    fig.savefig('test_power_bias.png')
+
+    return fig

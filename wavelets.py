@@ -374,6 +374,15 @@ class WaveletAnalysis(object):
         return self.cwt(self.anomaly_data, self.wavelet.time_rep,
                         self.scales(dt=1))
 
+    @property
+    def wavelet_power(self):
+        """Calculate the wavelet power spectrum, using the bias
+        correction factor introduced by Liu et al. 2007, which is to
+        divide by the scale.
+        """
+        s = np.expand_dims(self.scales(), 1)
+        return np.abs(self.wavelet_transform) ** 2 / s
+
     def reconstruction(self):
         """Reconstruct the original signal from the wavelet
         transform. See S3.i.
@@ -408,6 +417,12 @@ class WaveletAnalysis(object):
         x_n += self.data.mean()
 
         return x_n
+
+    @property
+    def global_wavelet_spectrum(self):
+        mean_power = np.mean(self.wavelet_power, axis=1)
+        var = self.data_variance
+        return mean_power / var
 
     @property
     def C_d(self):
@@ -481,9 +496,7 @@ class WaveletAnalysis(object):
 
         A = dj * dt / (C_d * N)
 
-        power = np.abs(self.wavelet_transform) ** 2
-        s = np.expand_dims(self.scales(), 1)
-        var = A * np.sum(power / s)
+        var = A * np.sum(self.wavelet_power)
 
         return var
 
