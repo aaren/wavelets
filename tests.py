@@ -166,3 +166,37 @@ def test_power_bias():
     fig.savefig('test_power_bias.png')
 
     return fig
+
+
+def test_plot_coi():
+    """Can we plot the Cone of Influence?."""
+    fig, ax = plt.subplots()
+
+    ax.set_title('Wavelet power spectrum with Cone of Influence')
+
+    t, s = wa.time, wa.scales()
+    coi = wa.coi
+    end = t[-1]
+
+    # plot the wavelet power
+    T, S = np.meshgrid(t, s)
+    ax.contourf(T, S, wa.wavelet_power, 100)
+
+    ax.set_yscale('log')
+    ax.set_ylabel('scale')
+    ax.set_xlabel('time')
+
+    # TODO: make a second re scaled y axis without plotting something.
+    ax_fourier = ax.twinx()
+    f = wa.fourier_periods
+    T, F = np.meshgrid(t, f)
+    ax_fourier.contourf(T, F, wa.wavelet_power, 100)
+    ax_fourier.set_yscale('log')
+    ax_fourier.set_ylabel('fourier period')
+
+    # shade the region between the edge and coi
+    ax_fourier.fill_betweenx(y=s, x1=coi, x2=0, color='gray', alpha=0.3)
+    ax_fourier.fill_betweenx(y=s, x1=end - coi, x2=end, color='gray', alpha=0.3)
+    ax_fourier.set_xlim(0, end)
+
+    fig.savefig('test_coi.png')

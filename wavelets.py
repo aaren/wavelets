@@ -148,6 +148,17 @@ class Morlet(object):
         Hw = 0.5 * (np.sign(w) + 1)
         return np.pi ** .25 * Hw * np.exp(-(s * w - self.w0) ** 2 / 2)
 
+    def coi(self, s):
+        """The e folding time for the autocorrelation of wavelet
+        power at each scale, i.e. the timescale over which an edge
+        effect decays by a factor of 1/e^2.
+
+        This can be worked out analytically by solving
+
+            |Y_0(T)|^2 / |Y_0(0)|^2 = 1 / e^2
+        """
+        return 2 ** .5 * s
+
 
 class Ricker(object):
     def __init__(self):
@@ -204,6 +215,17 @@ class Ricker(object):
         """
         A = np.pi ** -0.25 * np.sqrt(4 / 3)
         return A * (s * w) ** 2 * np.exp(-(s * w) ** 2 / 2)
+
+    def coi(self, s):
+        """The e folding time for the autocorrelation of wavelet
+        power at each scale, i.e. the timescale over which an edge
+        effect decays by a factor of 1/e^2.
+
+        This can be worked out analytically by solving
+
+            |Y_0(T)|^2 / |Y_0(0)|^2 = 1 / e^2
+        """
+        return 2 ** .5 * s
 
 
 class WaveletAnalysis(object):
@@ -277,6 +299,7 @@ class WaveletAnalysis(object):
             TODO: allow override s0
         """
         self.data = data
+        self.time = np.indices(data.shape).squeeze() * dt
         self.anomaly_data = self.data - self.data.mean()
         self.N = len(data)
         self.data_variance = self.data.var()
@@ -504,7 +527,11 @@ class WaveletAnalysis(object):
 
         return var
 
-
-# TODO: cone of influence
+    @property
+    def coi(self):
+        """The cone of influence, i.e. the region near the edges in
+        which edge effects may be important.
+        """
+        return self.wavelet.coi(self.scales())
 
 # TODO: derive C_d for given wavelet
