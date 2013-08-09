@@ -14,8 +14,10 @@ x = np.random.random(N)
 
 wa = WaveletAnalysis(x)
 
+
 def test_N():
     assert_equal(N, wa.N)
+
 
 def test_compare_cwt():
     """Compare the output of Scipy's cwt (using direct convolution)
@@ -34,6 +36,7 @@ def test_compare_cwt():
     fft_cwt = fft_cwt(data, morlet, widths)
 
     npt.assert_array_almost_equal(cwt, fft_cwt, decimal=13)
+
 
 def compare_morlet(N=2000):
     """Compare scipy morlet with my morlet (same, but correct
@@ -81,7 +84,7 @@ def test_var():
 
     Check that they are within 10%
     """
-    rdiff = 1 - wa.data_variance/ wa.wavelet_variance
+    rdiff = 1 - wa.data_variance / wa.wavelet_variance
     assert_less(rdiff, 0.1)
 
 

@@ -1,7 +1,5 @@
 from __future__ import division
 
-from functools import wraps
-
 import numpy as np
 import scipy
 import scipy.signal
@@ -55,8 +53,9 @@ def fft_cwt(data, wavelet, widths):
         M = 10 * width
         t = np.arange((-M + 1) / 2., (M + 1) / 2.)
         wavelet_data = (1 / width) ** .5 * wavelet(t, width)
-        output[ind, :] = scipy.signal.fftconvolve(data, wavelet_data,
-                                                            mode='same')
+        output[ind, :] = scipy.signal.fftconvolve(data,
+                                                  wavelet_data,
+                                                  mode='same')
     return output
 
 
@@ -123,9 +122,9 @@ class Morlet(object):
         output = np.exp(1j * w * x)
 
         if complete:
-            output -= np.exp(-0.5 * (w**2))
+            output -= np.exp(-0.5 * (w ** 2))
 
-        output *= np.exp(-0.5 * (x**2)) * np.pi**(-0.25)
+        output *= np.exp(-0.5 * (x ** 2)) * np.pi ** (-0.25)
 
         return output
 
@@ -264,7 +263,8 @@ class WaveletAnalysis(object):
     The equivalent fourier period is defined as where the wavelet
     power spectrum reaches its maximum and can be found analytically.
     """
-    def __init__(self, data=np.random.random(1000), dt=1, dj=0.125, wavelet=Morlet()):
+    def __init__(self, data=np.random.random(1000), dt=1, dj=0.125,
+                 wavelet=Morlet()):
         """Arguments:
             x - 1 dimensional input signal
             dt - sample spacing
@@ -300,6 +300,7 @@ class WaveletAnalysis(object):
         wavelet, this is roughly 1.
         """
         dt = dt or self.dt
+
         def f(s):
             return self.fourier_period(s) - 2 * dt
         return scipy.optimize.fsolve(f, 1)[0]
@@ -370,7 +371,8 @@ class WaveletAnalysis(object):
     @property
     def wavelet_transform(self):
         """Calculate the wavelet transform."""
-        return self.cwt(self.anomaly_data, self.wavelet.time_rep, self.scales(dt=1))
+        return self.cwt(self.anomaly_data, self.wavelet.time_rep,
+                        self.scales(dt=1))
 
     def reconstruction(self):
         """Reconstruct the original signal from the wavelet
