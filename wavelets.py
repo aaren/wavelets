@@ -289,6 +289,11 @@ class WaveletAnalysis(object):
         """
         return getattr(self.wavelet, 'fourier_period')
 
+    @property
+    def fourier_periods(self):
+        """Return the equivalent fourier periods for the scales used."""
+        return self.fourier_period(self.scales())
+
     def s0(self, dt=None):
         """Find the smallest resolvable scale by finding where the
         equivalent fourier period is equal to 2 * dt. For a Morlet
