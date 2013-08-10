@@ -153,12 +153,13 @@ def test_power_bias():
 
     signal = np.cos(w1 * x) + np.cos(w2 * x) + np.cos(w3 * x)
 
-    wa = WaveletAnalysis(signal, wavelet=wavelets.Morlet())
+    wa = WaveletAnalysis(signal, wavelet=wavelets.Morlet(), unbias=False)
 
-    power = wa.global_wavelet_spectrum
-    wa.unbias = False
     power_biased = wa.global_wavelet_spectrum
     wa.unbias = True
+    power = wa.global_wavelet_spectrum
+    wa.mask_coi = True
+    power_coi = wa.global_wavelet_spectrum
 
     freqs = wa.fourier_periods
 
@@ -184,22 +185,25 @@ def test_power_bias():
     ax_power = ax[1]
     ax_power.set_title('Global wavelet spectrum '
                        '(estimator for power spectrum)')
-    ax_power.plot(freqs, power, 'k', label=r'norm by $s^{-1/2}$')
+    ax_power.plot(freqs, power, 'k', label=r'all domain')
+    ax_power.plot(freqs, power_coi, 'g', label=r'coi only')
     ax_power.set_xscale('log')
     ax_power.set_xlim(10, 1000)
     ax_power.set_xlabel('fourier period')
-    ax_power.set_ylabel(r'power / $\sigma^2$  normalise by $s^{-1}$')
+    ax_power.set_ylabel(r'power / $\sigma^2$  (bias corrected)')
 
     ax_power_bi = ax_power.twinx()
-    ax_power_bi.plot(freqs, power_biased, 'r', label=r'norm by $s^{-1}$')
+    ax_power_bi.plot(freqs, power_biased, 'r')
     ax_power_bi.set_xlim(10, 1000)
-    ax_power_bi.set_ylabel(r'power / $\sigma^2$  uncorrected')
+    ax_power_bi.set_ylabel(r'power / $\sigma^2$  (bias uncorrected)')
     ax_power_bi.set_yticklabels(ax_power_bi.get_yticks(), color='r')
 
     label = "T={0}"
     for T in (T1, T2, T3):
         ax_power.axvline(T)
         ax_power.annotate(label.format(T), (T, 1))
+
+    ax_power.legend(fontsize='x-small', loc='lower right')
 
     fig.tight_layout()
     fig.savefig('test_power_bias.png')

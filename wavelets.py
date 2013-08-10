@@ -334,7 +334,7 @@ class WaveletAnalysis(object):
     power spectrum reaches its maximum and can be found analytically.
     """
     def __init__(self, data=np.random.random(1000), dt=1, dj=0.125,
-                 wavelet=Morlet(), unbias=True, compute_with_freq=False):
+                 wavelet=Morlet(), unbias=True, mask_coi=False, compute_with_freq=False):
         """Arguments:
             x - 1 dimensional input signal
             dt - sample spacing
@@ -348,6 +348,9 @@ class WaveletAnalysis(object):
                      et al. 2007 (default True)
             compute_with_freq - default False, compute the cwt using
                                 a frequency representation
+            mask_coi - disregard wavelet power outside the cone of
+                       influence when computing global wavelet spectrum
+                       (default False)
             TODO: allow override s0
         """
         self.data = data
@@ -362,6 +365,7 @@ class WaveletAnalysis(object):
         self.cwt = fft_cwt
         self.compute_with_freq = compute_with_freq
         self.unbias = unbias
+        self.mask_coi = mask_coi
 
     @property
     def fourier_period(self):
@@ -511,9 +515,28 @@ class WaveletAnalysis(object):
 
     @property
     def global_wavelet_spectrum(self):
-        mean_power = np.mean(self.wavelet_power, axis=1)
+        if not self.mask_coi:
+            mean_power = np.mean(self.wavelet_power, axis=1)
+        elif self.mask_coi:
+            mean_power = self.coi_mean(self.wavelet_power, axis=1)
         var = self.data_variance
         return mean_power / var
+
+    def coi_mean(self, arr, axis=1):
+        """Calculate a mean, but only over times within the cone of
+        influence.
+
+        Implement so can replace np.mean(wavelet_power, axis=1)
+        """
+        # TODO: consider applying upstream, inside wavelet_power
+        coi = self.wavelet.coi
+        s = self.scales()
+        t = self.time
+        T, S = np.meshgrid(t, s)
+        inside_coi = (coi(S) < T) & (T < (T.max() - coi(S)))
+        mask_power = np.ma.masked_where(~inside_coi, self.wavelet_power)
+        mask_mean = np.mean(mask_power, axis=axis)
+        return mask_mean
 
     @property
     def C_d(self):
