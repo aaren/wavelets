@@ -76,24 +76,54 @@ def test_Cd():
     assert_almost_equal(wa.C_d, 0.776, places=2)
 
 
-def test_var():
+def test_var_time():
     """The wavelet transform conserves total energy, i.e. variance.
 
     The variance of the data should be the same as the variance of
     the wavelet.
 
-    Check that they are within 10%
+    Check that they are within 10%% for the time representation.
     """
     rdiff = 1 - wa.data_variance / wa.wavelet_variance
     assert_less(rdiff, 0.1)
 
 
-def test_reconstruction():
+def test_var_freq():
+    """The wavelet transform conserves total energy, i.e. variance.
+
+    The variance of the data should be the same as the variance of
+    the wavelet.
+
+    Check that they are within 10%% for the frequency representation.
+    """
+    wa = WaveletAnalysis(x, compute_with_freq=True)
+    rdiff = 1 - wa.data_variance / wa.wavelet_variance
+    assert_less(rdiff, 0.1)
+
+
+def test_reconstruction_time():
     """In principle one can reconstruct the input data from the
     wavelet transform.
 
-    Check within 10%.
+    Check within 10% when computing with time representation of
+    wavelet.
     """
+    rdata = wa.reconstruction()
+    npt.assert_array_almost_equal(wa.data, rdata, decimal=1)
+
+    err = wa.data - rdata
+    assert(np.abs(err.mean()) < 0.05)
+    assert(err.std() < 0.05)
+
+
+def test_reconstruction_freq():
+    """In principle one can reconstruct the input data from the
+    wavelet transform.
+
+    Check within 10% when computing with frequency representation of
+    wavelet.
+    """
+    wa = WaveletAnalysis(x, compute_with_freq=True)
     rdata = wa.reconstruction()
     npt.assert_array_almost_equal(wa.data, rdata, decimal=1)
 
@@ -141,6 +171,16 @@ def test_power_bias():
     ax_transform.set_ylim(10, 1000)
     ax_transform.set_yscale('log')
     ax_transform.contourf(X, Y, wa.wavelet_power, 100)
+
+    # shade the region between the edge and coi
+    C, S = wa.coi
+    S_max = wa.scales().max()
+    f = wa.fourier_periods
+    f_max = wa.fourier_periods.max()
+    # TODO: why isn't this plotting?
+    # try F = wa.fourier_period(S)
+    ax_transform.fill_between(x=C, y1=f, y2=f_max, color='gray', alpha=0.3)
+    ax_transform.set_xlim(0, t.max())
 
     ax_power = ax[1]
     ax_power.set_title('Global wavelet spectrum '

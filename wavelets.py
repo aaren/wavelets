@@ -6,7 +6,7 @@ import scipy.signal
 import scipy.optimize
 
 
-def fft_cwt(data, wavelet, widths):
+def fft_cwt(data, wavelet_time=None, wavelet_freq=None, widths=None, dt=1):
     """Continuous wavelet transform using the fourier transform
     convolution as used in Terrence and Compo.
 
@@ -24,10 +24,12 @@ def fft_cwt(data, wavelet, widths):
     ----------
     data : (N,) ndarray
         data on which to perform the transform.
-    wavelet : function
-        Wavelet function, which should take 2 arguments.
-        The first argument is the number of points that the returned vector
-        will have (len(wavelet(width,length)) == length).
+
+    wavelet_time : function
+        Wavelet function in time space, which should take 2
+        arguments.
+        The first parameter is a time  (or array of times)
+
         The second is a width parameter, defining the size of the wavelet
         (e.g. standard deviation of a gaussian). See `ricker`, which
         satisfies these requirements.
@@ -35,9 +37,25 @@ def fft_cwt(data, wavelet, widths):
         The wavelet function, Y, should be such that
         Int[-inf][inf](|Y|^2) = 1
 
-        It is then multiplied here by (dt / s) ^ (1/2), which gives
-        it unit energy. dt here is equal to 1 (as we are using the
-        index as the time coordinate) and s is the width.
+        It is then multiplied here by (s / dt) ^ (1/2),
+        which gives it unit energy. dt here is equal to 1 (as we are
+        using the index as the time coordinate) and s is the width.
+
+    wavelet_freq : function
+        Wavelet function in frequency space, which should take 2
+        arguments.
+        The first parameter is a frequency (or array of frequencies)
+
+        The second is a width parameter, defining the size of the wavelet
+        (e.g. standard deviation of a gaussian). See `ricker`, which
+        satisfies these requirements.
+
+        The wavelet function, Y, should be such that
+        Int[-inf][inf](|Y|^2) = 1
+
+        It is then multiplied here by (2 * pi * dt / s) ^ (1/2),
+        which gives it unit energy. dt here is equal to 1 (as we are
+        using the index as the time coordinate) and s is the width.
 
     widths : (M,) sequence
         Widths to use for transform.
@@ -50,21 +68,46 @@ def fft_cwt(data, wavelet, widths):
         Will have shape of (len(data), len(widths)).
 
     """
+    if widths is None:
+        raise UserWarning('Have to specify some widths (scales)')
+
+    if not wavelet_time and not wavelet_freq:
+        raise UserWarning('Have to specify a wavelet function')
+
+    N = data.size
     # wavelets can be complex so output is complex
-    output = np.zeros((len(widths), len(data)), dtype=np.complex)
-    for ind, width in enumerate(widths):
-        # number of points needed to capture wavelet
-        M = 10 * width
-        t = np.arange((-M + 1) / 2., (M + 1) / 2.)
-        wavelet_data = (1 / width) ** .5 * wavelet(t, width)
-        output[ind, :] = scipy.signal.fftconvolve(data,
-                                                  wavelet_data,
-                                                  mode='same')
+    output = np.zeros((len(widths), N), dtype=np.complex)
+
+    if not wavelet_time:
+        # next highest power of two for padding
+        pN = int(2 ** np.ceil(np.log2(N)))
+        # N.B. padding in fft adds zeros to the *end* of the array,
+        # not equally either end.
+        fft_data = scipy.fft(data, n=pN)
+        # frequencies
+        w_k = np.fft.fftfreq(pN, d=dt) * 2 * np.pi
+        for ind, width in enumerate(widths):
+            # sample wavelet and normalise
+            wavelet_data = (2 * np.pi * width) ** .5 * wavelet_freq(w_k, width)
+            out = scipy.ifft(fft_data * wavelet_data.conj(), n=pN)
+            # remove zero padding
+            output[ind, :] = out[:N]
+
+    elif not wavelet_freq:
+        for ind, width in enumerate(widths):
+            # number of points needed to capture wavelet
+            M = 10 * width
+            # times to use, centred at zero
+            t = np.arange((-M + 1) / 2., (M + 1) / 2.) * dt
+            # sample wavelet and normalise
+            wavelet_data = (1 / width) ** .5 * wavelet_time(t, width)
+            output[ind, :] = scipy.signal.fftconvolve(data,
+                                                      wavelet_data,
+                                                      mode='same')
+
     return output
 
 
-# TODO: reimplement cwt to match mathematical ufunc wavelet functions
-# TODO: use ifft for cwt, rather than fftconvolve
 class Morlet(object):
     def __init__(self, w0=6):
         self.w0 = w0
@@ -138,15 +181,16 @@ class Morlet(object):
         return 4 * np.pi * s / (self.w0 + (2 + self.w0 ** 2) ** .5)
 
     # Frequency representation
-    def frequency_rep(self, s, w):
+    def frequency_rep(self, w, s=1.0):
         """Frequency representation of morlet.
 
         s - scale
         w - angular frequency
         """
+        x = w * s
         # heaviside mock
-        Hw = 0.5 * (np.sign(w) + 1)
-        return np.pi ** .25 * Hw * np.exp(-(s * w - self.w0) ** 2 / 2)
+        Hw = 0.5 * (np.sign(x) + 1)
+        return np.pi ** -.25 * Hw * np.exp((-(x - self.w0) ** 2) / 2)
 
     def coi(self, s):
         """The e folding time for the autocorrelation of wavelet
@@ -207,7 +251,7 @@ class Ricker(object):
         """Equivalent fourier period of ricker / dog2 / mexican hat."""
         return 2 * np.pi * s / (5 / 2) ** .5
 
-    def frequency_rep(self, s, w):
+    def frequency_rep(self, w, s=1.0):
         """Frequency representation of ricker.
 
         s - scale
@@ -295,7 +339,18 @@ class WaveletAnalysis(object):
             x - 1 dimensional input signal
             dt - sample spacing
             dj - scale resolution
-            wavelet - wavelet function to use
+            wavelet - wavelet class to use, must have an attribute
+                      `time_rep`, giving a wavelet function that takes (t, s)
+                      as arguments and, if compute_with_freq is True, an
+                      attribute `frequency_rep`, giving a wavelet function
+                      that takes (w, s) as arguments.
+            unbias - whether to unbias the power spectrum, as in Liu
+                     et al. 2007 (default True)
+            mask_coi - disregard wavelet power outside the cone of
+                       influence when computing global wavelet spectrum
+                       (default False)
+            compute_with_freq - default False, compute the cwt using
+                                a frequency representation
             TODO: allow override s0
         """
         self.data = data
@@ -308,6 +363,7 @@ class WaveletAnalysis(object):
         self.wavelet = wavelet
         # which continuous wavelet transform to use
         self.cwt = fft_cwt
+        self.compute_with_freq = compute_with_freq
 
     @property
     def fourier_period(self):
@@ -398,8 +454,15 @@ class WaveletAnalysis(object):
     @property
     def wavelet_transform(self):
         """Calculate the wavelet transform."""
-        return self.cwt(self.anomaly_data, self.wavelet.time_rep,
-                        self.scales(dt=1))
+        widths = self.scales(dt=1)
+        if self.compute_with_freq:
+            return self.cwt(self.anomaly_data,
+                            wavelet_freq=self.wavelet.frequency_rep,
+                            widths=widths)
+        else:
+            return self.cwt(self.anomaly_data,
+                            wavelet_time=self.wavelet.time_rep,
+                            widths=widths)
 
     @property
     def wavelet_power(self):
@@ -502,7 +565,7 @@ class WaveletAnalysis(object):
         K, S = np.meshgrid(k, s)
 
         # compute Y_ over all s, w_k and sum over k
-        W_d = (1 / N) * np.sum(Y_(S, self.w_k(K)), axis=1)
+        W_d = (1 / N) * np.sum(Y_(self.w_k(K), S), axis=1)
 
         # N.B This W_d is 1D
 
