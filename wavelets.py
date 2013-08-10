@@ -529,9 +529,28 @@ class WaveletAnalysis(object):
 
     @property
     def coi(self):
-        """The cone of influence, i.e. the region near the edges in
-        which edge effects may be important.
+        """The Cone of Influence is the region near the edges of the
+        input signal in which edge effects may be important.
+
+        Return a tuple (T, S) that describes the edge of the cone
+        of influence as a single line in (time, scale).
         """
-        return self.wavelet.coi(self.scales())
+        Tmin = self.time.min()
+        Tmax = self.time.max()
+        T = Tmax - Tmin
+        s = self.scales()
+        c1 = Tmin + self.wavelet.coi(s)
+        c2 = Tmax - c1
+
+        C = np.hstack((c1[np.where(c1 < T / 2)], c2[np.where(c2 > T / 2)]))
+        S = np.hstack((s[np.where(c1 < T / 2)], s[np.where(c2 > T / 2)]))
+
+        # sort w.r.t time
+        iC = C.argsort()
+        sC = C[iC]
+        sS = S[iC]
+
+        return sC, sS
+
 
 # TODO: derive C_d for given wavelet

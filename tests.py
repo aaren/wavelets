@@ -175,8 +175,6 @@ def test_plot_coi():
     ax.set_title('Wavelet power spectrum with Cone of Influence')
 
     t, s = wa.time, wa.scales()
-    coi = wa.coi
-    end = t[-1]
 
     # plot the wavelet power
     T, S = np.meshgrid(t, s)
@@ -195,8 +193,9 @@ def test_plot_coi():
     ax_fourier.set_ylabel('fourier period')
 
     # shade the region between the edge and coi
-    ax_fourier.fill_betweenx(y=s, x1=coi, x2=0, color='gray', alpha=0.3)
-    ax_fourier.fill_betweenx(y=s, x1=end - coi, x2=end, color='gray', alpha=0.3)
-    ax_fourier.set_xlim(0, end)
+    C, S = wa.coi
+    S_max = wa.scales().max()
+    ax_fourier.fill_between(x=C, y1=S, y2=S_max, color='gray', alpha=0.3)
+    ax_fourier.set_xlim(0, t.max())
 
     fig.savefig('test_coi.png')
