@@ -177,13 +177,9 @@ def test_power_bias():
 
     # shade the region between the edge and coi
     C, S = wa.coi
-    S_max = wa.scales().max()
-    f = wa.fourier_periods
-    f_max = wa.fourier_periods.max()
-    # TODO: why isn't this plotting?
-    # try F = wa.fourier_period(S)
-    ax_transform.fill_between(x=C, y1=f, y2=f_max, color='gray', alpha=0.3)
-    ax_transform.set_xlim(0, t.max())
+    F = wa.fourier_period(S)
+    f_max = F.max()
+    ax_transform.fill_between(x=C, y1=F, y2=f_max, color='gray', alpha=0.3)
 
     ax_power = ax[1]
     ax_power.set_title('Global wavelet spectrum '
