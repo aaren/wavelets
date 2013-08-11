@@ -19,7 +19,7 @@ def test_N():
     assert_equal(N, wa.N)
 
 
-def test_compare_cwt():
+def compare_cwt():
     """Compare the output of Scipy's cwt (using direct convolution)
     and my cwt (using fft convolution).
     """
