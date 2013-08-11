@@ -88,7 +88,8 @@ def fft_cwt(data, wavelet_time=None, wavelet_freq=None, widths=None, dt=1):
         w_k = np.fft.fftfreq(pN, d=dt) * 2 * np.pi
         for ind, width in enumerate(widths):
             # sample wavelet and normalise
-            wavelet_data = (2 * np.pi * width) ** .5 * wavelet_freq(w_k, width)
+            norm = (2 * np.pi * width / dt) ** .5
+            wavelet_data = norm * wavelet_freq(w_k, width)
             out = scipy.ifft(fft_data * wavelet_data.conj(), n=pN)
             # remove zero padding
             output[ind, :] = out[:N]
@@ -96,11 +97,12 @@ def fft_cwt(data, wavelet_time=None, wavelet_freq=None, widths=None, dt=1):
     elif not wavelet_freq:
         for ind, width in enumerate(widths):
             # number of points needed to capture wavelet
-            M = 10 * width
+            M = 10 * width / dt
             # times to use, centred at zero
             t = np.arange((-M + 1) / 2., (M + 1) / 2.) * dt
             # sample wavelet and normalise
-            wavelet_data = (1 / width) ** .5 * wavelet_time(t, width)
+            norm = (dt / width) ** .5
+            wavelet_data = norm * wavelet_time(t, width)
             output[ind, :] = scipy.signal.fftconvolve(data,
                                                       wavelet_data,
                                                       mode='same')
@@ -359,7 +361,6 @@ class WaveletAnalysis(object):
             TODO: allow override s0
         """
         self.data = data
-        self.time = np.indices(data.shape).squeeze() * dt
         self.anomaly_data = self.data - self.data.mean()
         self.N = len(data)
         self.data_variance = self.data.var()
@@ -373,6 +374,11 @@ class WaveletAnalysis(object):
         self.mask_coi = mask_coi
 
     @property
+    def time(self):
+        """Return array of times corresponding to data points."""
+        return np.indices(self.data.shape).squeeze() * self.dt
+
+    @property
     def fourier_period(self):
         """Return a function that calculates the equivalent fourier
         period as a function of scale.
@@ -382,20 +388,22 @@ class WaveletAnalysis(object):
     @property
     def fourier_periods(self):
         """Return the equivalent fourier periods for the scales used."""
-        return self.fourier_period(self.scales())
+        return self.fourier_period(self.scales)
 
-    def s0(self, dt=None):
+    @property
+    def s0(self):
         """Find the smallest resolvable scale by finding where the
         equivalent fourier period is equal to 2 * dt. For a Morlet
         wavelet, this is roughly 1.
         """
-        dt = dt or self.dt
+        dt = self.dt
 
         def f(s):
             return self.fourier_period(s) - 2 * dt
         return scipy.optimize.fsolve(f, 1)[0]
 
-    def scales(self, dt=None):
+    @property
+    def scales(self):
         """Form a set of scales to use in the wavelet transform.
 
         For non-orthogonal wavelet analysis, one can use an
@@ -418,12 +426,12 @@ class WaveletAnalysis(object):
         that still adequately samples scale. Smaller dj gives finer
         scale resolution.
         """
-        dt = dt or self.dt
+        dt = self.dt
         # resolution
         dj = self.dj
         # smallest resolvable scale, chosen so that the equivalent
         # fourier period is approximately 2dt
-        s0 = self.s0(dt=dt)
+        s0 = self.s0
 
         # Largest scale
         J = int((1 / dj) * np.log2(self.N * dt / s0))
@@ -432,7 +440,7 @@ class WaveletAnalysis(object):
         return sj
 
     # TODO: use np.frompyfunc on this
-    def w_k(self, k=None, dt=None):
+    def w_k(self, k=None):
         """Angular frequency as a function of fourier index.
 
         If no k, returns an array of all the angular frequencies
@@ -440,7 +448,7 @@ class WaveletAnalysis(object):
 
         See eq5 of TC.
         """
-        dt = dt or self.dt
+        dt = self.dt
         N = self.N
         a = 2 * np.pi / (N * dt)
         if k is None:
@@ -461,15 +469,17 @@ class WaveletAnalysis(object):
     @property
     def wavelet_transform(self):
         """Calculate the wavelet transform."""
-        widths = self.scales(dt=1)
+        widths = self.scales
         if self.compute_with_freq:
             return self.cwt(self.anomaly_data,
                             wavelet_freq=self.wavelet.frequency_rep,
-                            widths=widths)
+                            widths=widths,
+                            dt=self.dt)
         else:
             return self.cwt(self.anomaly_data,
                             wavelet_time=self.wavelet.time_rep,
-                            widths=widths)
+                            widths=widths,
+                            dt=self.dt)
 
     @property
     def wavelet_power(self):
@@ -477,7 +487,7 @@ class WaveletAnalysis(object):
         the bias correction factor introduced by Liu et al. 2007,
         which is to divide by the scale.
         """
-        s = np.expand_dims(self.scales(), 1)
+        s = np.expand_dims(self.scales, 1)
         if self.unbias:
             return np.abs(self.wavelet_transform) ** 2 / s
         elif not self.unbias:
@@ -508,7 +518,7 @@ class WaveletAnalysis(object):
         Y_00 = self.wavelet.time_rep(0)
         W_n = self.wavelet_transform
         # TODO: allow specification of scales
-        s = np.expand_dims(self.scales(), 1)
+        s = np.expand_dims(self.scales, 1)
 
         real_sum = np.sum(W_n.real / s ** .5, axis=0)
         x_n = real_sum * (dj * dt ** .5 / (C_d * Y_00))
@@ -535,7 +545,7 @@ class WaveletAnalysis(object):
         """
         # TODO: consider applying upstream, inside wavelet_power
         coi = self.wavelet.coi
-        s = self.scales()
+        s = self.scales
         t = self.time
         T, S = np.meshgrid(t, s)
         inside_coi = (coi(S) < T) & (T < (T.max() - coi(S)))
@@ -572,8 +582,8 @@ class WaveletAnalysis(object):
         dt = self.dt
         C_d = 1
         W_d = self.wavelet_transform_delta
-        s = np.expand_dims(self.scales(), 1)
-        s = self.scales()
+        s = np.expand_dims(self.scales, 1)
+        s = self.scales
         # value of the wavelet function at t=0
         Y_00 = self.wavelet.time_rep(0)
 
@@ -592,7 +602,7 @@ class WaveletAnalysis(object):
         # wavelet as function of (s, w_k)
         Y_ = self.wavelet.frequency_rep
         k = np.arange(N)
-        s = self.scales()
+        s = self.scales
         K, S = np.meshgrid(k, s)
 
         # compute Y_ over all s, w_k and sum over k
@@ -632,7 +642,7 @@ class WaveletAnalysis(object):
         Tmin = self.time.min()
         Tmax = self.time.max()
         T = Tmax - Tmin
-        s = self.scales()
+        s = self.scales
         c1 = Tmin + self.wavelet.coi(s)
         c2 = Tmax - c1
 

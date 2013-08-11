@@ -28,7 +28,7 @@ def compare_cwt():
 
     data = np.random.random(2000)
     wave_anal = WaveletAnalysis(data, wavelet=wavelets.Ricker())
-    widths = wave_anal.scales()[::-1]
+    widths = wave_anal.scales[::-1]
 
     morlet = scipy.signal.morlet
 
@@ -140,12 +140,12 @@ def test_power_bias():
     The power spectrum should contain peaks at the frequencies, all
     of which should be the same height.
     """
-    # implicit dt=1
-    x = np.arange(5000)
+    dt = 0.1
+    x = np.arange(5000) * dt
 
-    T1 = 20
-    T2 = 100
-    T3 = 500
+    T1 = 20 * dt
+    T2 = 100 * dt
+    T3 = 500 * dt
 
     w1 = 2 * np.pi / T1
     w2 = 2 * np.pi / T2
@@ -153,7 +153,8 @@ def test_power_bias():
 
     signal = np.cos(w1 * x) + np.cos(w2 * x) + np.cos(w3 * x)
 
-    wa = WaveletAnalysis(signal, wavelet=wavelets.Morlet(), unbias=False)
+    wa = WaveletAnalysis(signal, dt=dt,
+                         wavelet=wavelets.Morlet(), unbias=False)
 
     power_biased = wa.global_wavelet_spectrum
     wa.unbias = True
@@ -169,10 +170,10 @@ def test_power_bias():
     fig_info = (r"Wavelet transform of "
                 r"$cos(2 \pi / {T1}) + cos(2 \pi / {T2}) + cos(2 \pi / {T3})$")
     ax_transform.set_title(fig_info.format(T1=T1, T2=T2, T3=T3))
-    X, Y = np.meshgrid(x, wa.fourier_periods)
+    X, Y = np.meshgrid(wa.time, wa.fourier_periods)
     ax_transform.set_xlabel('time')
     ax_transform.set_ylabel('fourier period')
-    ax_transform.set_ylim(10, 1000)
+    ax_transform.set_ylim(10 * dt, 1000 * dt)
     ax_transform.set_yscale('log')
     ax_transform.contourf(X, Y, wa.wavelet_power, 100)
 
@@ -185,16 +186,16 @@ def test_power_bias():
     ax_power = ax[1]
     ax_power.set_title('Global wavelet spectrum '
                        '(estimator for power spectrum)')
-    ax_power.plot(freqs, power, 'k', label=r'all domain')
-    ax_power.plot(freqs, power_coi, 'g', label=r'coi only')
+    ax_power.plot(freqs, power, 'k', label=r'unbiased all domain')
+    ax_power.plot(freqs, power_coi, 'g', label=r'unbiased coi only')
     ax_power.set_xscale('log')
-    ax_power.set_xlim(10, 1000)
+    ax_power.set_xlim(10 * dt, wa.time.max())
     ax_power.set_xlabel('fourier period')
     ax_power.set_ylabel(r'power / $\sigma^2$  (bias corrected)')
 
     ax_power_bi = ax_power.twinx()
-    ax_power_bi.plot(freqs, power_biased, 'r')
-    ax_power_bi.set_xlim(10, 1000)
+    ax_power_bi.plot(freqs, power_biased, 'r', label='biased all domain')
+    ax_power_bi.set_xlim(10 * dt, wa.time.max())
     ax_power_bi.set_ylabel(r'power / $\sigma^2$  (bias uncorrected)')
     ax_power_bi.set_yticklabels(ax_power_bi.get_yticks(), color='r')
 
@@ -204,6 +205,7 @@ def test_power_bias():
         ax_power.annotate(label.format(T), (T, 1))
 
     ax_power.legend(fontsize='x-small', loc='lower right')
+    ax_power_bi.legend(fontsize='x-small', loc='upper right')
 
     fig.tight_layout()
     fig.savefig('test_power_bias.png')
@@ -217,7 +219,7 @@ def test_plot_coi():
 
     ax.set_title('Wavelet power spectrum with Cone of Influence')
 
-    t, s = wa.time, wa.scales()
+    t, s = wa.time, wa.scales
 
     # plot the wavelet power
     T, S = np.meshgrid(t, s)
@@ -237,7 +239,7 @@ def test_plot_coi():
 
     # shade the region between the edge and coi
     C, S = wa.coi
-    S_max = wa.scales().max()
+    S_max = wa.scales.max()
     ax_fourier.fill_between(x=C, y1=S, y2=S_max, color='gray', alpha=0.3)
     ax_fourier.set_xlim(0, t.max())
 
