@@ -334,7 +334,7 @@ class WaveletAnalysis(object):
     power spectrum reaches its maximum and can be found analytically.
     """
     def __init__(self, data=np.random.random(1000), dt=1, dj=0.125,
-                 wavelet=Morlet(), compute_with_freq=False):
+                 wavelet=Morlet(), unbias=True, compute_with_freq=False):
         """Arguments:
             x - 1 dimensional input signal
             dt - sample spacing
@@ -346,9 +346,6 @@ class WaveletAnalysis(object):
                       that takes (w, s) as arguments.
             unbias - whether to unbias the power spectrum, as in Liu
                      et al. 2007 (default True)
-            mask_coi - disregard wavelet power outside the cone of
-                       influence when computing global wavelet spectrum
-                       (default False)
             compute_with_freq - default False, compute the cwt using
                                 a frequency representation
             TODO: allow override s0
@@ -364,6 +361,7 @@ class WaveletAnalysis(object):
         # which continuous wavelet transform to use
         self.cwt = fft_cwt
         self.compute_with_freq = compute_with_freq
+        self.unbias = unbias
 
     @property
     def fourier_period(self):
@@ -466,12 +464,15 @@ class WaveletAnalysis(object):
 
     @property
     def wavelet_power(self):
-        """Calculate the wavelet power spectrum, using the bias
-        correction factor introduced by Liu et al. 2007, which is to
-        divide by the scale.
+        """Calculate the wavelet power spectrum, optionally using
+        the bias correction factor introduced by Liu et al. 2007,
+        which is to divide by the scale.
         """
         s = np.expand_dims(self.scales(), 1)
-        return np.abs(self.wavelet_transform) ** 2 / s
+        if self.unbias:
+            return np.abs(self.wavelet_transform) ** 2 / s
+        elif not self.unbias:
+            return np.abs(self.wavelet_transform) ** 2
 
     def reconstruction(self):
         """Reconstruct the original signal from the wavelet

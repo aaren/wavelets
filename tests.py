@@ -156,7 +156,10 @@ def test_power_bias():
     wa = WaveletAnalysis(signal, wavelet=wavelets.Morlet())
 
     power = wa.global_wavelet_spectrum
-    power_biased = power * wa.scales()
+    wa.unbias = False
+    power_biased = wa.global_wavelet_spectrum
+    wa.unbias = True
+
     freqs = wa.fourier_periods
 
     fig, ax = plt.subplots(nrows=2)
@@ -191,11 +194,11 @@ def test_power_bias():
     ax_power.set_xlabel('fourier period')
     ax_power.set_ylabel(r'power / $\sigma^2$  normalise by $s^{-1}$')
 
-    ax_power_un = ax_power.twinx()
-    ax_power_un.plot(freqs, power_biased, 'r', label=r'norm by $s^{-1}$')
-    ax_power_un.set_xlim(10, 1000)
-    ax_power_un.set_ylabel(r'power / $\sigma^2$  uncorrected')
-    ax_power_un.set_yticklabels(ax_power_un.get_yticks(), color='r')
+    ax_power_bi = ax_power.twinx()
+    ax_power_bi.plot(freqs, power_biased, 'r', label=r'norm by $s^{-1}$')
+    ax_power_bi.set_xlim(10, 1000)
+    ax_power_bi.set_ylabel(r'power / $\sigma^2$  uncorrected')
+    ax_power_bi.set_yticklabels(ax_power_bi.get_yticks(), color='r')
 
     label = "T={0}"
     for T in (T1, T2, T3):
