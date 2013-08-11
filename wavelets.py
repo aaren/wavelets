@@ -111,6 +111,9 @@ def fft_cwt(data, wavelet_time=None, wavelet_freq=None, widths=None, dt=1):
 class Morlet(object):
     def __init__(self, w0=6):
         self.w0 = w0
+        if w0 == 6:
+            # value of C_d from TC98
+            self.C_d = 0.776
 
     def __call__(self, *args, **kwargs):
         return self.time_rep(*args, **kwargs)
@@ -206,7 +209,8 @@ class Morlet(object):
 
 class Ricker(object):
     def __init__(self):
-        pass
+        # value of C_d from TC98
+        self.C_d = 3.541
 
     def __call__(self, *args, **kwargs):
         return self.time_rep(*args, **kwargs)
@@ -334,7 +338,8 @@ class WaveletAnalysis(object):
     power spectrum reaches its maximum and can be found analytically.
     """
     def __init__(self, data=np.random.random(1000), dt=1, dj=0.125,
-                 wavelet=Morlet(), unbias=True, mask_coi=False, compute_with_freq=False):
+                 wavelet=Morlet(), unbias=True, mask_coi=False,
+                 compute_with_freq=False):
         """Arguments:
             x - 1 dimensional input signal
             dt - sample spacing
@@ -561,6 +566,8 @@ class WaveletAnalysis(object):
         C_d is scale independent and a constant for each wavelet
         function.
         """
+        if self.wavelet.C_d is not None:
+            return self.wavelet.C_d
         dj = self.dj
         dt = self.dt
         C_d = 1
@@ -573,7 +580,7 @@ class WaveletAnalysis(object):
         real_sum = np.sum(W_d.real / s ** .5)
         C_d = real_sum * (dj * dt ** .5 / (C_d * Y_00))
         # TODO: coming out as 0.26 for morlet
-        return 0.776
+        return C_d
 
     @property
     def wavelet_transform_delta(self):
