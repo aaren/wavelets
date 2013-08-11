@@ -622,6 +622,8 @@ class WaveletAnalysis(object):
 
         Returns the variance of the input data.
         """
+        # TODO: mask coi for calculation of wavelet_variance
+        # is this possible? how does it change the factors?
         dj = self.dj
         dt = self.dt
         C_d = self.C_d
