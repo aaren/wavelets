@@ -334,7 +334,7 @@ class WaveletAnalysis(object):
     power spectrum reaches its maximum and can be found analytically.
     """
     def __init__(self, data=np.random.random(1000), dt=1, dj=0.125,
-                 wavelet=Morlet()):
+                 wavelet=Morlet(), compute_with_freq=False):
         """Arguments:
             x - 1 dimensional input signal
             dt - sample spacing
