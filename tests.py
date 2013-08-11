@@ -1,8 +1,11 @@
+from __future__ import division
+
 from nose.tools import *
 import numpy.testing as npt
 
 import numpy as np
 import scipy.signal
+from scipy.io import wavfile
 import matplotlib.pyplot as plt
 
 import wavelets
@@ -244,3 +247,34 @@ def test_plot_coi():
     ax_fourier.set_xlim(0, t.max())
 
     fig.savefig('test_coi.png')
+
+
+def analyse_song():
+    """Compute the wavelet transform of a song."""
+    fs, song = wavfile.read('alarma.wav')
+
+    # select first part of one channel
+    stride = 1
+    # time step is inverse sample rate * stride
+    dt = stride / fs
+    # number of seconds of song to analyse
+    t_s = 1
+    n_s = fs * t_s
+
+    # sub sample song on a single channel
+    sub_song = song[:n_s:stride, 0]
+
+    wa = WaveletAnalysis(sub_song, dt=dt)
+
+    fig, ax = plt.subplots()
+    T, F = np.meshgrid(wa.time, wa.fourier_periods)
+    freqs = 1 / F
+    ax.contourf(T, freqs, wa.wavelet_power, 100)
+    ax.set_yscale('log')
+
+    ax.set_ylabel('frequency (Hz)')
+    ax.set_xlabel('time (s)')
+
+    ax.set_ylim(100, 10000)
+
+    fig.savefig('alarma_wavelet.png')
