@@ -5,6 +5,8 @@ import scipy
 import scipy.signal
 import scipy.optimize
 
+__all__ = ['fft_cwt', 'Morlet', 'Ricker', 'WaveletAnalysis']
+
 
 def fft_cwt(data, wavelet_time=None, wavelet_freq=None, widths=None, dt=1):
     """Continuous wavelet transform using the fourier transform
