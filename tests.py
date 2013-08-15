@@ -287,7 +287,7 @@ def plot_random_data():
     a.set_ylim(30, 0)
     a.set_axis_off()
     f.set_dpi(100)
-    f.set_size_inches(6, 3)
+    f.set_size_inches(8, 4)
     f.savefig('random_data.png')
 
 
