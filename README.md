@@ -1,7 +1,7 @@
 Continuous wavelet transforms in Python.
 
 A Clean Python implementation of the wavelet analysis outlined in [Torrence
-and Compo][TC_Home] [(BAMS, 1998)][TC98].
+and Compo][TC_Home] (BAMS, 1998)
 
 [TC_home]: http://paos.colorado.edu/research/wavelets/
 [TC_98]: http://paos.colorado.edu/research/wavelets/bams_79_01_0061.pdf
