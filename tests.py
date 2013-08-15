@@ -278,3 +278,31 @@ def analyse_song():
     ax.set_ylim(100, 10000)
 
     fig.savefig('alarma_wavelet.png')
+
+
+def plot_random_data():
+    """Used for the screenshot in the README."""
+    f, a = plt.subplots(frameon=False)
+    a.contourf(wa.wavelet_power, 256)
+    a.set_ylim(30, 0)
+    a.set_axis_off()
+    f.set_dpi(100)
+    f.set_size_inches(6, 3)
+    f.savefig('random_data.png')
+
+
+def plot_morlet():
+    """
+    TODO: make a pretty plot of the morlet for the README
+    """
+    morlet = wavelets.Morlet().time_rep
+    s = 1
+    T = np.linspace(-5 * s, 5 * s, 200)
+    Y = morlet(T, s=s)
+
+    f, a = plt.subplots()
+    a.plot(T, Y, 'k')
+    a.set_title('Morlet wavelet')
+    a.set_xlabel('t / s')
+
+    f.savefig('morlet.png')
