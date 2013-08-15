@@ -114,6 +114,10 @@ def fft_cwt(data, wavelet_time=None, wavelet_freq=None, widths=None, dt=1):
 
 class Morlet(object):
     def __init__(self, w0=6):
+        """w0 is the nondimensional frequency constant. If this is
+        set too low then the wavelet does not sample very well: a
+        value over 5 should be ok, Terrence and Compo set it to 6.
+        """
         self.w0 = w0
         if w0 == 6:
             # value of C_d from TC98
