@@ -446,6 +446,7 @@ class WaveletAnalysis(object):
         return sj
 
     # TODO: use np.frompyfunc on this
+    # TODO: can we just replace it with fftfreqs?
     def w_k(self, k=None):
         """Angular frequency as a function of fourier index.
 
