@@ -8,7 +8,7 @@ import scipy.optimize
 __all__ = ['cwt', 'Morlet', 'Ricker', 'WaveletAnalysis']
 
 
-def cwt(data, wavelet_time=None, wavelet_freq=None, widths=None, dt=1):
+def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False):
     """Continuous wavelet transform using the fourier transform
     convolution as used in Terrence and Compo.
 
@@ -27,42 +27,39 @@ def cwt(data, wavelet_time=None, wavelet_freq=None, widths=None, dt=1):
     data : (N,) ndarray
         data on which to perform the transform.
 
-    wavelet_time : function
-        Wavelet function in time space, which should take 2
-        arguments.
-        The first parameter is a time  (or array of times)
+    wavelet : function
+        Wavelet function in either time or frequency space, which
+        should take 2 arguments. If the wavelet is frequency based,
+        wavelet_freq must be set to True.
+
+        The first parameter is time or frequency.
 
         The second is a width parameter, defining the size of the wavelet
-        (e.g. standard deviation of a gaussian). See `ricker`, which
-        satisfies these requirements.
+        (e.g. standard deviation of a gaussian).
 
         The wavelet function, Y, should be such that
         Int[-inf][inf](|Y|^2) = 1
 
-        It is then multiplied here by (s / dt) ^ (1/2),
-        which gives it unit energy. dt here is equal to 1 (as we are
-        using the index as the time coordinate) and s is the width.
+        It is then multiplied here by a normalisation factor,
+        which gives it unit energy.
 
-    wavelet_freq : function
-        Wavelet function in frequency space, which should take 2
-        arguments.
-        The first parameter is a frequency (or array of frequencies)
+        In the time domain, the normalisation factor is
 
-        The second is a width parameter, defining the size of the wavelet
-        (e.g. standard deviation of a gaussian). See `ricker`, which
-        satisfies these requirements.
+            (s / dt)
 
-        The wavelet function, Y, should be such that
-        Int[-inf][inf](|Y|^2) = 1
+        In the frequency domain, the normalisation factor is
 
-        It is then multiplied here by (2 * pi * dt / s) ^ (1/2),
-        which gives it unit energy. dt here is equal to 1 (as we are
-        using the index as the time coordinate) and s is the width.
+            (2 * pi * dt / s) ^ (1/2),
 
     widths : (M,) sequence
         Widths to use for transform.
+
     dt: float
         sample spacing. defaults to 1 (data sample units).
+
+    wavelet_freq: boolean. Whether the wavelet function is one of
+                  time or frequency. Default, False, is for a time
+                  representation of the wavelet function.
 
     Returns
     -------
@@ -73,14 +70,15 @@ def cwt(data, wavelet_time=None, wavelet_freq=None, widths=None, dt=1):
     if widths is None:
         raise UserWarning('Have to specify some widths (scales)')
 
-    if not wavelet_time and not wavelet_freq:
+    if not wavelet:
         raise UserWarning('Have to specify a wavelet function')
 
     N = data.size
     # wavelets can be complex so output is complex
     output = np.zeros((len(widths), N), dtype=np.complex)
 
-    if not wavelet_time:
+    if wavelet_freq:
+        # compute in frequency
         # next highest power of two for padding
         pN = int(2 ** np.ceil(np.log2(N)))
         # N.B. padding in fft adds zeros to the *end* of the array,
@@ -91,12 +89,13 @@ def cwt(data, wavelet_time=None, wavelet_freq=None, widths=None, dt=1):
         for ind, width in enumerate(widths):
             # sample wavelet and normalise
             norm = (2 * np.pi * width / dt) ** .5
-            wavelet_data = norm * wavelet_freq(w_k, width)
+            wavelet_data = norm * wavelet(w_k, width)
             out = scipy.ifft(fft_data * wavelet_data.conj(), n=pN)
             # remove zero padding
             output[ind, :] = out[:N]
 
     elif not wavelet_freq:
+        # compute in time
         for ind, width in enumerate(widths):
             # number of points needed to capture wavelet
             M = 10 * width / dt
@@ -104,7 +103,7 @@ def cwt(data, wavelet_time=None, wavelet_freq=None, widths=None, dt=1):
             t = np.arange((-M + 1) / 2., (M + 1) / 2.) * dt
             # sample wavelet and normalise
             norm = (dt / width) ** .5
-            wavelet_data = norm * wavelet_time(t, width)
+            wavelet_data = norm * wavelet(t, width)
             output[ind, :] = scipy.signal.fftconvolve(data,
                                                       wavelet_data,
                                                       mode='same')
@@ -477,16 +476,17 @@ class WaveletAnalysis(object):
     def wavelet_transform(self):
         """Calculate the wavelet transform."""
         widths = self.scales
+
         if self.compute_with_freq:
-            return self.cwt(self.anomaly_data,
-                            wavelet_freq=self.wavelet.frequency_rep,
-                            widths=widths,
-                            dt=self.dt)
+            wavelet = self.wavelet.frequency_rep
         else:
-            return self.cwt(self.anomaly_data,
-                            wavelet_time=self.wavelet.time_rep,
-                            widths=widths,
-                            dt=self.dt)
+            wavelet = self.wavelet.time_rep
+
+        return self.cwt(self.anomaly_data,
+                        wavelet=wavelet,
+                        widths=widths,
+                        dt=self.dt,
+                        wavelet_freq=self.compute_with_freq)
 
     @property
     def wavelet_power(self):
