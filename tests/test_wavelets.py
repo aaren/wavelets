@@ -6,6 +6,7 @@ import numpy.testing as npt
 import numpy as np
 import scipy.signal
 from scipy.io import wavfile
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 import wavelets
@@ -243,24 +244,38 @@ def test_plot_coi():
     T, S = np.meshgrid(t, s)
     ax.contourf(T, S, wa.wavelet_power, 256)
 
-    ax.set_yscale('log')
     ax.set_ylabel('scale')
     ax.set_xlabel('time')
+    ax.set_yscale('log')
+    ax.grid(True)
 
-    # TODO: make a second re scaled y axis without plotting something.
+    # put the ticks at powers of 2 in the scale
+    ticks = np.unique(2 ** np.floor(np.log2(s)))[1:]
+    ax.yaxis.set_ticks(ticks)
+    ax.yaxis.set_major_formatter(mpl.ticker.Formatter())
+    ax.yaxis.set_ticklabels(ticks.astype(str))
+
+    # second y scale with equivalent fourier periods to scales
     ax_fourier = ax.twinx()
-    f = wa.fourier_periods
-    T, F = np.meshgrid(t, f)
-    ax_fourier.contourf(T, F, wa.wavelet_power, 100)
     ax_fourier.set_yscale('log')
+    # match the fourier ticks to the scale ticks
+    # see http://stackoverflow.com/questions/15123928
+    scale_tick_locs = ax.yaxis.get_ticklocs()
+
+    def fourierFormatter(x, pos):
+        return "{0}".format(wa.fourier_period(x))
+
+    formatter = mpl.ticker.FuncFormatter(fourierFormatter)
+    ax_fourier.yaxis.set_major_formatter(formatter)
+    ax_fourier.set_yticks(wa.fourier_period(scale_tick_locs))
     ax_fourier.set_ylabel('fourier period')
+    fourier_lim = [wa.fourier_period(i) for i in ax.get_ylim()]
+    ax_fourier.set_ylim(fourier_lim)
 
     # shade the region between the edge and coi
     C, S = wa.coi
-
-    S_max = wa.scales.max()
-    ax_fourier.fill_between(x=C, y1=S, y2=S_max, color='gray', alpha=0.5)
-    ax_fourier.set_xlim(t.min(), t.max())
+    ax.fill_between(x=C, y1=S, y2=s.max(), color='gray', alpha=0.5)
+    ax.set_xlim(t.min(), t.max())
 
     fig.savefig('tests/test_coi.png')
 
