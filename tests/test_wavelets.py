@@ -267,7 +267,7 @@ def test_plot_coi():
 
     # shade the region between the edge and coi
     C, S = wa.coi
-    ax.fill_between(x=C, y1=S, y2=s.max(), color='gray', alpha=0.5)
+    ax.fill_between(x=C, y1=S, y2=s.max(), color='gray', alpha=0.3)
     ax.set_xlim(t.min(), t.max())
 
     fig.savefig('tests/test_coi.png')
