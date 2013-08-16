@@ -244,7 +244,7 @@ def test_plot_coi():
     ax.contourf(T, S, wa.wavelet_power, 256)
 
     ax.set_ylabel('scale (years)')
-    ax.set_xlabel('time')
+    ax.set_xlabel('year')
     ax.set_yscale('log')
     ax.grid(True)
 
