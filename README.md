@@ -1,4 +1,5 @@
 Continuous wavelet transforms in Python.
+----------------------------------------
 
 A Clean Python implementation of the wavelet analysis outlined in [Torrence
 and Compo][TC_Home] (BAMS, 1998)
@@ -6,7 +7,7 @@ and Compo][TC_Home] (BAMS, 1998)
 [TC_home]: http://paos.colorado.edu/research/wavelets/
 [TC_98]: http://paos.colorado.edu/research/wavelets/bams_79_01_0061.pdf
 
-![random data](https://raw.github.com/aaren/wavelets/images/random_data.png)
+![random data](https://raw.github.com/aaren/wavelets/master/tests/test_coi.png)
 
 
 ### Usage ###
