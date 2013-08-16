@@ -256,6 +256,7 @@ def test_plot_coi():
     ax.yaxis.set_ticklabels(ticks.astype(str))
 
     # second y scale with equivalent fourier periods to scales
+    # except with the ticks at the powers of 2
     ax_fourier = ax.twinx()
     ax_fourier.set_yscale('log')
     # match the fourier ticks to the scale ticks
@@ -263,11 +264,11 @@ def test_plot_coi():
     scale_tick_locs = ax.yaxis.get_ticklocs()
 
     def fourierFormatter(x, pos):
-        return "{0}".format(wa.fourier_period(x))
+        return "{0}".format(x)
 
     formatter = mpl.ticker.FuncFormatter(fourierFormatter)
     ax_fourier.yaxis.set_major_formatter(formatter)
-    ax_fourier.set_yticks(wa.fourier_period(scale_tick_locs))
+    ax_fourier.set_yticks(scale_tick_locs)
     ax_fourier.set_ylabel('fourier period')
     fourier_lim = [wa.fourier_period(i) for i in ax.get_ylim()]
     ax_fourier.set_ylim(fourier_lim)
