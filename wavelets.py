@@ -346,7 +346,7 @@ class WaveletAnalysis(object):
     power spectrum reaches its maximum and can be found analytically.
     """
     def __init__(self, data=np.random.random(1000), dt=1, dj=0.125,
-                 wavelet=Morlet(), unbias=True, mask_coi=False,
+                 wavelet=Morlet(), unbias=False, mask_coi=False,
                  compute_with_freq=False):
         """Arguments:
             x - 1 dimensional input signal
@@ -358,7 +358,7 @@ class WaveletAnalysis(object):
                       attribute `frequency_rep`, giving a wavelet function
                       that takes (w, s) as arguments.
             unbias - whether to unbias the power spectrum, as in Liu
-                     et al. 2007 (default True)
+                     et al. 2007 (default False)
             compute_with_freq - default False, compute the cwt using
                                 a frequency representation
             mask_coi - disregard wavelet power outside the cone of
