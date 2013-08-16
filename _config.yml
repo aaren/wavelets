@@ -1,2 +1,2 @@
-markdown: kramdown
-path: aaren.me/wavelets
+markdown: redcarpet
+path: http://aaren.me/wavelets
