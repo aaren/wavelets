@@ -6,7 +6,6 @@ import numpy.testing as npt
 import numpy as np
 import scipy.signal
 from scipy.io import wavfile
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 import wavelets
@@ -236,7 +235,7 @@ def test_plot_coi():
     """Can we plot the Cone of Influence?."""
     fig, ax = plt.subplots()
 
-    ax.set_title('Nino 3 SST wavelet power spectrum with Cone of Influence')
+    ax.set_title('Nino 3 SST wavelet power spectrum')
 
     t, s = wa.time, wa.scales
 
@@ -244,7 +243,7 @@ def test_plot_coi():
     T, S = np.meshgrid(t, s)
     ax.contourf(T, S, wa.wavelet_power, 256)
 
-    ax.set_ylabel('scale')
+    ax.set_ylabel('scale (years)')
     ax.set_xlabel('time')
     ax.set_yscale('log')
     ax.grid(True)
@@ -252,7 +251,6 @@ def test_plot_coi():
     # put the ticks at powers of 2 in the scale
     ticks = np.unique(2 ** np.floor(np.log2(s)))[1:]
     ax.yaxis.set_ticks(ticks)
-    ax.yaxis.set_major_formatter(mpl.ticker.Formatter())
     ax.yaxis.set_ticklabels(ticks.astype(str))
 
     # second y scale with equivalent fourier periods to scales
@@ -260,16 +258,9 @@ def test_plot_coi():
     ax_fourier = ax.twinx()
     ax_fourier.set_yscale('log')
     # match the fourier ticks to the scale ticks
-    # see http://stackoverflow.com/questions/15123928
-    scale_tick_locs = ax.yaxis.get_ticklocs()
-
-    def fourierFormatter(x, pos):
-        return "{0}".format(x)
-
-    formatter = mpl.ticker.FuncFormatter(fourierFormatter)
-    ax_fourier.yaxis.set_major_formatter(formatter)
-    ax_fourier.set_yticks(scale_tick_locs)
-    ax_fourier.set_ylabel('fourier period')
+    ax_fourier.set_yticks(ticks)
+    ax_fourier.set_yticklabels(ticks.astype(str))
+    ax_fourier.set_ylabel('fourier period (years)')
     fourier_lim = [wa.fourier_period(i) for i in ax.get_ylim()]
     ax_fourier.set_ylim(fourier_lim)
 
