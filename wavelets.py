@@ -5,10 +5,10 @@ import scipy
 import scipy.signal
 import scipy.optimize
 
-__all__ = ['fft_cwt', 'Morlet', 'Ricker', 'WaveletAnalysis']
+__all__ = ['cwt', 'Morlet', 'Ricker', 'WaveletAnalysis']
 
 
-def fft_cwt(data, wavelet_time=None, wavelet_freq=None, widths=None, dt=1):
+def cwt(data, wavelet_time=None, wavelet_freq=None, widths=None, dt=1):
     """Continuous wavelet transform using the fourier transform
     convolution as used in Terrence and Compo.
 
@@ -374,7 +374,7 @@ class WaveletAnalysis(object):
         self.dj = dj
         self.wavelet = wavelet
         # which continuous wavelet transform to use
-        self.cwt = fft_cwt
+        self.cwt = cwt
         self.compute_with_freq = compute_with_freq
         self.unbias = unbias
         self.mask_coi = mask_coi

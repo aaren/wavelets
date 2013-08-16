@@ -27,7 +27,7 @@ def compare_cwt():
     and my cwt (using fft convolution).
     """
     cwt = scipy.signal.cwt
-    fft_cwt = wavelets.fft_cwt
+    fft_cwt = wavelets.cwt
 
     data = np.random.random(2000)
     wave_anal = WaveletAnalysis(data, wavelet=wavelets.Ricker())
@@ -49,7 +49,7 @@ def compare_morlet(N=2000):
     wave_anal = WaveletAnalysis(data, wavelet='ricker')
     scales = wave_anal.scales[::-1]
 
-    cwt = wavelets.fft_cwt
+    cwt = wavelets.cwt
     cwt_sp = cwt(data, scipy.signal.morlet, scales)
     cwt_me = cwt(data, wavelets.Morlet(), scales)
     cwt_ri = cwt(data, scipy.signal.ricker, scales)
