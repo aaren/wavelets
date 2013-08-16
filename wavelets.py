@@ -633,10 +633,11 @@ class WaveletAnalysis(object):
         dt = self.dt
         C_d = self.C_d
         N = self.N
+        s = np.expand_dims(self.scales, 1)
 
         A = dj * dt / (C_d * N)
 
-        var = A * np.sum(self.wavelet_power)
+        var = A * np.sum(np.abs(self.wavelet_transform) ** 2 / s)
 
         return var
 
