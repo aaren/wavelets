@@ -344,11 +344,14 @@ class WaveletAnalysis(object):
     The equivalent fourier period is defined as where the wavelet
     power spectrum reaches its maximum and can be found analytically.
     """
-    def __init__(self, data=np.random.random(1000), dt=1, dj=0.125,
-                 wavelet=Morlet(), unbias=False, mask_coi=False,
+    def __init__(self, data=np.random.random(1000), time=None, dt=1,
+                 dj=0.125, wavelet=Morlet(), unbias=False, mask_coi=False,
                  compute_with_freq=False):
         """Arguments:
             x - 1 dimensional input signal
+            time - corresponding times for the input signal
+                   not essential, but the coi will be calculated
+                   for time starting at zero.
             dt - sample spacing
             dj - scale resolution
             wavelet - wavelet class to use, must have an attribute
@@ -366,6 +369,9 @@ class WaveletAnalysis(object):
             TODO: allow override s0
         """
         self.data = data
+        if time is None:
+            time = np.indices(data.shape).squeeze() * dt
+        self.time = time
         self.anomaly_data = self.data - self.data.mean()
         self.N = len(data)
         self.data_variance = self.data.var()
@@ -377,11 +383,6 @@ class WaveletAnalysis(object):
         self.compute_with_freq = compute_with_freq
         self.unbias = unbias
         self.mask_coi = mask_coi
-
-    @property
-    def time(self):
-        """Return array of times corresponding to data points."""
-        return np.indices(self.data.shape).squeeze() * self.dt
 
     @property
     def fourier_period(self):
@@ -651,13 +652,13 @@ class WaveletAnalysis(object):
         """
         Tmin = self.time.min()
         Tmax = self.time.max()
-        T = Tmax - Tmin
+        Tmid = Tmin + (Tmax - Tmin) / 2
         s = self.scales
         c1 = Tmin + self.wavelet.coi(s)
-        c2 = Tmax - c1
+        c2 = Tmax - self.wavelet.coi(s)
 
-        C = np.hstack((c1[np.where(c1 < T / 2)], c2[np.where(c2 > T / 2)]))
-        S = np.hstack((s[np.where(c1 < T / 2)], s[np.where(c2 > T / 2)]))
+        C = np.hstack((c1[np.where(c1 < Tmid)], c2[np.where(c2 > Tmid)]))
+        S = np.hstack((s[np.where(c1 < Tmid)], s[np.where(c2 > Tmid)]))
 
         # sort w.r.t time
         iC = C.argsort()
