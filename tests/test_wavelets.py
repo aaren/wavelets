@@ -11,6 +11,11 @@ import matplotlib.pyplot as plt
 import wavelets
 from wavelets import WaveletAnalysis
 
+__all__ = ['test_N', 'compare_cwt', 'compare_morlet', 'test_Cd',
+           'test_var_time', 'test_var_freq', 'test_reconstruction_time',
+           'test_reconstruction_freq', 'test_power_bias', 'test_plot_coi',
+           ]
+
 
 N = 1000
 x = np.random.random(N)
@@ -211,7 +216,7 @@ def test_power_bias():
     ax_power_bi.legend(fontsize='x-small', loc='upper right')
 
     fig.tight_layout()
-    fig.savefig('test_power_bias.png')
+    fig.savefig('tests/test_power_bias.png')
 
     return fig
 
@@ -246,7 +251,7 @@ def test_plot_coi():
     ax_fourier.fill_between(x=C, y1=S, y2=S_max, color='gray', alpha=0.3)
     ax_fourier.set_xlim(0, t.max())
 
-    fig.savefig('test_coi.png')
+    fig.savefig('tests/test_coi.png')
 
 
 def analyse_song():

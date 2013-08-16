@@ -1,3 +1,1 @@
-from wavelets import *
-
-import tests
+from .wavelets import *
