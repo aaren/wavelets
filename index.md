@@ -1,5 +1,5 @@
 ---
-title: continuous wavelet transforms in python
+layout: index
 ---
 
 Continuous wavelet transforms in Python.
