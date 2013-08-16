@@ -653,7 +653,7 @@ class WaveletAnalysis(object):
         Tmin = self.time.min()
         Tmax = self.time.max()
         Tmid = Tmin + (Tmax - Tmin) / 2
-        s = self.scales
+        s = np.linspace(self.scales.min(), self.scales.max(), 100)
         c1 = Tmin + self.wavelet.coi(s)
         c2 = Tmax - self.wavelet.coi(s)
 
