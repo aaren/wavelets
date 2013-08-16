@@ -252,6 +252,7 @@ def test_plot_coi():
     ticks = np.unique(2 ** np.floor(np.log2(s)))[1:]
     ax.yaxis.set_ticks(ticks)
     ax.yaxis.set_ticklabels(ticks.astype(str))
+    ax.set_ylim(64, 0.5)
 
     # second y scale with equivalent fourier periods to scales
     # except with the ticks at the powers of 2
