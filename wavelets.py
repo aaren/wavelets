@@ -439,6 +439,44 @@ Marr = Ricker
 Mexican_hat = Ricker
 
 
+class Shannon(object):
+    """Attempt to implement the shannon wavelet.
+
+    see http://en.wikipedia.org/wiki/Shannon_wavelet
+    """
+    def __init__(self):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return self.time_rep(*args, **kwargs)
+
+    def time_rep(self, t, s=1.0):
+        """
+        scipy.special.sinc(x) = sin(pi*x) / (pi * x)
+
+        This has unit energy, i.e. integrating along the real line gives 1
+        """
+        x = t / s
+        return scipy.special.sinc(x) * np.exp(-2j * np.pi * x)
+
+    def frequency_rep(self, w, s=1.0):
+        """
+        the frequency representation is formed from two gate functions
+        at -3/2 and 3/2. Unlike wikipedia, here the factor of pi is
+        removed. This makes the integral over the real line equal
+        to 2, so we multiply the function by 0.5 to give it unit energy.
+        """
+        x = w * s
+
+        # gate mock
+        def gate(z):
+            """1 if |z| < 1/2, otherwise 0."""
+            return 0.25 * (np.sign(z + 0.5) + 1) * (np.sign(0.5 - z) + 1)
+
+        self.gate = gate
+        return 0.5 * (gate(x - 1.5) + gate(x + 1.5))
+
+
 class WaveletAnalysis(object):
     """
     Sx.y are references to section x.y in Terrence and Compo,
