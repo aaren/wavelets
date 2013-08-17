@@ -4,8 +4,12 @@ import numpy as np
 import scipy
 import scipy.signal
 import scipy.optimize
+import scipy.special
+from scipy.misc import factorial
 
-__all__ = ['cwt', 'Morlet', 'Ricker', 'WaveletAnalysis']
+__all__ = ['cwt', 'Morlet', 'Paul', 'DOG',
+           'Ricker', 'Marr', 'Mexican_hat',
+           'WaveletAnalysis']
 
 
 def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False):
@@ -214,23 +218,125 @@ class Morlet(object):
         return 2 ** .5 * s
 
 
-class Ricker(object):
-    def __init__(self):
-        # value of C_d from TC98
-        self.C_d = 3.541
+class Paul(object):
+    def __init__(self, m=4):
+        """Initialise a Paul wavelet function of order m.
+        """
+        self.m = m
 
     def __call__(self, *args, **kwargs):
         return self.time_rep(*args, **kwargs)
 
     def time_rep(self, t, s=1.0):
         """
-        Return a Ricker wavelet, also known as the "Mexican hat wavelet".
+        Complex Paul wavelet, centred at zero.
 
-        It models the function:
+        Parameters
+        ----------
+        t : float
+            Time. If s is not specified, i.e. set to 1, this can be
+            used as the non-dimensional time t/s.
+        s : float
+            Scaling factor. Default is 1.
 
-            ``A (1 - x^2/s^2) exp(-t^2/s^2)``,
+        Returns
+        -------
+        complex: value of the paul wavelet at the given time
 
-        where ``A = 2/sqrt(3)pi^1/3``.
+        The Paul wavelet is defined (in time) as::
+
+            (2 ** m * i ** m * m!) / (pi * (2 * m)!) \
+                    * (1 - i * t / s) ** -(m + 1)
+
+        """
+        m = self.m
+        x = t / s
+
+        const = (2 ** m * 1j ** m * factorial(m)) \
+            / (np.pi * factorial(2 * m)) ** .5
+        functional_form = (1 - 1j * x) ** -(m + 1)
+
+        output = const * functional_form
+
+        return output
+
+    # Fourier wavelengths
+    def fourier_period(self, s):
+        """Equivalent fourier period of Paul"""
+        return 4 * np.pi * s / (2 * self.m + 1)
+
+    # Frequency representation
+    def frequency_rep(self, w, s=1.0):
+        """Frequency representation of Paul.
+
+        Parameters
+        ----------
+        w : float
+            Angular frequency. If s is not specified, i.e. set to 1,
+            this can be used as the non-dimensional angular
+            frequency w * s.
+        s : float
+            Scaling factor. Default is 1.
+
+        Returns
+        -------
+        complex: value of the paul wavelet at the given time
+
+        """
+        m = self.m
+        x = w * s
+        # heaviside mock
+        Hw = 0.5 * (np.sign(x) + 1)
+
+        # prefactor
+        const = 2 ** m / (m * factorial(2 * m - 1)) ** .5
+
+        functional_form = Hw * (x) ** m * np.exp(-x)
+
+        output = const * functional_form
+
+        return output
+
+    def coi(self, s):
+        """The e folding time for the autocorrelation of wavelet
+        power at each scale, i.e. the timescale over which an edge
+        effect decays by a factor of 1/e^2.
+
+        This can be worked out analytically by solving
+
+            |Y_0(T)|^2 / |Y_0(0)|^2 = 1 / e^2
+        """
+        return s / 2 ** .5
+
+
+class DOG(object):
+    def __init__(self, m=2):
+        """Initialise a Derivative of Gaussian wavelet of order m."""
+        if m == 2:
+            # value of C_d from TC98
+            self.C_d = 3.541
+        elif m == 6:
+            self.C_d = 1.966
+        else:
+            pass
+        self.m = m
+
+    def __call__(self, *args, **kwargs):
+        return self.time_rep(*args, **kwargs)
+
+    def time_rep(self, t, s=1.0):
+        """
+        Return a DOG wavelet,
+
+        When m = 2, this is also known as the "Mexican hat", "Marr"
+        or "Ricker" wavelet.
+
+        It models the function::
+
+            ``A d^m/dx^m exp(-x^2 / 2)``,
+
+        where ``A = (-1)^(m+1) / (gamma(m + 1/2))^.5``
+        and   ``x = t / s``.
 
         Note that the energy of the return wavelet is not normalised
         according to s.
@@ -247,29 +353,64 @@ class Ricker(object):
         -------
         float : value of the ricker wavelet at the given time
 
+
+        Notes
+        -----
+        The derivative of the gaussian has a polynomial representation:
+
+        from http://en.wikipedia.org/wiki/Gaussian_function:
+
+        "Mathematically, the derivatives of the Gaussian function can be
+        represented using Hermite functions. The n-th derivative of the
+        Gaussian is the Gaussian function itself multiplied by the n-th
+        Hermite polynomial, up to scale."
+
+        http://en.wikipedia.org/wiki/Hermite_polynomial
+
+        Here, we want the 'probabilists' Hermite polynomial (He_n),
+        which is computed by scipy.special.hermitenorm
+
         """
         x = t / s
+        m = self.m
 
-        # this prefactor comes from the gamma function in
-        # Derivative of Gaussian.
-        A = np.pi ** -0.25 * np.sqrt(4 / 3)
+        # compute the hermite polynomial (used to evaluate the
+        # derivative of a gaussian)
+        He_n = scipy.special.hermitenorm(m)
+        gamma = scipy.special.gamma
 
-        output = A * (1 - x ** 2) * np.exp(-x ** 2 / 2)
+        const = (-1) ** (m + 1) / gamma(m + 0.5) ** .5
+        function = He_n(x) * np.exp(-x ** 2 / 2)
 
-        return output
+        return const * function
 
     def fourier_period(self, s):
-        """Equivalent fourier period of ricker / dog2 / mexican hat."""
-        return 2 * np.pi * s / (5 / 2) ** .5
+        """Equivalent fourier period of derivative of gaussian"""
+        return 2 * np.pi * s / (self.m + 0.5) ** .5
 
     def frequency_rep(self, w, s=1.0):
-        """Frequency representation of ricker.
+        """Frequency representation of derivative of gaussian.
 
-        s - scale
-        w - angular frequency
+        Parameters
+        ----------
+        w : float
+            Angular frequency. If s is not specified, i.e. set to 1,
+            this can be used as the non-dimensional angular
+            frequency w * s.
+        s : float
+            Scaling factor. Default is 1.
+
+        Returns
+        -------
+        complex: value of the derivative of gaussian wavelet at the
+                 given time
         """
-        A = np.pi ** -0.25 * np.sqrt(4 / 3)
-        return A * (s * w) ** 2 * np.exp(-(s * w) ** 2 / 2)
+        m = self.m
+        x = s * w
+        gamma = scipy.special.gamma
+        const = -1j ** m / gamma(m + 0.5) ** .5
+        function = x ** m * np.exp(-x ** 2 / 2)
+        return const * function
 
     def coi(self, s):
         """The e folding time for the autocorrelation of wavelet
@@ -281,6 +422,21 @@ class Ricker(object):
             |Y_0(T)|^2 / |Y_0(0)|^2 = 1 / e^2
         """
         return 2 ** .5 * s
+
+
+class Ricker(DOG):
+    def __init__(self):
+        """The Ricker, aka Marr / Mexican Hat, wavelet is a
+        derivative of gaussian order 2.
+        """
+        DOG.__init__(self, m=2)
+        # value of C_d from TC98
+        self.C_d = 3.541
+
+
+# aliases for DOG2
+Marr = Ricker
+Mexican_hat = Ricker
 
 
 class WaveletAnalysis(object):

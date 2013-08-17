@@ -16,6 +16,36 @@ __all__ = ['test_N', 'compare_cwt', 'compare_morlet', 'test_Cd',
            'test_reconstruction_freq', 'test_power_bias', 'test_plot_coi',
            ]
 
+
+def test_Morlet():
+    """Compare against \Psi_0(0) in Table 2 of TC98.
+
+    Value at frequency = 0 should be 0.
+    """
+    npt.assert_almost_equal(wavelets.Morlet()(0), np.pi ** -.25, 3)
+    npt.assert_almost_equal(wavelets.Morlet().frequency_rep(0), 0, 6)
+
+
+def test_Paul():
+    """Compare against \Psi_0(0) in Table 2 of TC98.
+
+    Value at frequency = 0 should be 0.
+    """
+    npt.assert_almost_equal(wavelets.Paul(m=4)(0), 1.079, 3)
+    npt.assert_almost_equal(wavelets.Paul(m=4).frequency_rep(0), 0, 6)
+
+
+def test_DOG():
+    """Compare against \Psi_0(0) in Table 2 of TC98.
+
+    Value at frequency = 0 should be 0.
+    """
+    npt.assert_almost_equal(wavelets.DOG(m=2)(0), 0.867, 3)
+    npt.assert_almost_equal(wavelets.DOG(m=6)(0), 0.884, 3)
+    npt.assert_almost_equal(wavelets.DOG(m=2).frequency_rep(0), 0, 6)
+    npt.assert_almost_equal(wavelets.DOG(m=6).frequency_rep(0), 0, 6)
+
+
 test_data = np.loadtxt('tests/nino3data.asc', skiprows=3)
 
 nino_time = test_data[:, 0]
