@@ -441,7 +441,7 @@ Mexican_hat = Ricker
 
 class WaveletAnalysis(object):
     """
-    Sx.y are references to section x.y in Terrence and Compo,
+    Sx.y are references to section x.y in Torrence and Compo,
     A Practical Guide to Wavelet Analysis (BAMS, 1998)
 
 
