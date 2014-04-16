@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Wavelets by aaren</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Wavelets</h1>
+        <p>Python implementation of the wavelet analysis found in Torrence and Compo (1998)</p>
+
+        <p class="view"><a href="https://github.com/aaren/wavelets">View the Project on GitHub <small>aaren/wavelets</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/aaren/wavelets/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/aaren/wavelets/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/aaren/wavelets">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h2>
+<a name="continuous-wavelet-transforms-in-python" class="anchor" href="#continuous-wavelet-transforms-in-python"><span class="octicon octicon-link"></span></a>Continuous wavelet transforms in Python.</h2>
+
+<p>A Clean Python implementation of the wavelet analysis outlined in <a href="http://paos.colorado.edu/research/wavelets/">Torrence
+and Compo</a> (BAMS, 1998)</p>
+
+<p><img src="https://raw.github.com/aaren/wavelets/master/tests/test_coi.png" alt="random data"></p>
+
+<h3>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h3>
+
+<div class="highlight highlight-python"><pre><span class="kn">from</span> <span class="nn">wavelets</span> <span class="kn">import</span> <span class="n">WaveletAnalysis</span>
+
+<span class="c"># given a signal x(t)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="c"># and a sample spacing</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+<span class="n">wa</span> <span class="o">=</span> <span class="n">WaveletAnalysis</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">)</span>
+
+<span class="c"># wavelet power spectrum</span>
+<span class="n">power</span> <span class="o">=</span> <span class="n">wa</span><span class="o">.</span><span class="n">wavelet_power</span>
+
+<span class="c"># scales </span>
+<span class="n">scales</span> <span class="o">=</span> <span class="n">wa</span><span class="o">.</span><span class="n">scales</span>
+
+<span class="c"># associated time vector</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">wa</span><span class="o">.</span><span class="n">time</span>
+
+<span class="c"># reconstruction of the original data</span>
+<span class="n">rx</span> <span class="o">=</span> <span class="n">wa</span><span class="o">.</span><span class="n">reconstruction</span><span class="p">()</span>
+</pre></div>
+
+<h4>
+<a name="how-would-you-plot-this" class="anchor" href="#how-would-you-plot-this"><span class="octicon octicon-link"></span></a>How would you plot this?</h4>
+
+<div class="highlight highlight-python"><pre><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">T</span><span class="p">,</span> <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">scales</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s">'log'</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s">'test_wavelet_power_spectrum.png'</span><span class="p">)</span>
+</pre></div>
+
+<p>See the <a href="./tests.py">tests</a> for more plotting examples.</p>
+
+<h4>
+<a name="what-wavelet-functions-can-i-use" class="anchor" href="#what-wavelet-functions-can-i-use"><span class="octicon octicon-link"></span></a>What wavelet functions can I use?</h4>
+
+<p>The default is to use the Morlet. The Ricker (aka Mexican hat, aka
+Marr) is also available.</p>
+
+<p>You can write your own wavelet functions, in either time or
+frequency. Just follow the example of Morlet in the source.</p>
+
+<p>You specify the function to use when starting the analysis:</p>
+
+<div class="highlight highlight-python"><pre><span class="kn">from</span> <span class="nn">wavelets</span> <span class="kn">import</span> <span class="n">Ricker</span>
+
+<span class="n">wa</span> <span class="o">=</span> <span class="n">WaveletAnalysis</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">wavelet</span><span class="o">=</span><span class="n">Ricker</span><span class="p">(),</span> <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">)</span>
+</pre></div>
+
+<h3>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h3>
+
+<ul>
+<li>Python 2.7</li>
+<li>Numpy (developed with 1.7.1)</li>
+<li>Scipy (developed with 0.12.0)</li>
+</ul><p>Scipy is only used for <code>signal.fftconvolve</code> and <code>optimize.fsolve</code>,
+and could potentially be removed.</p>
+
+<h3>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h3>
+
+<p>The MIT License (MIT)</p>
+
+<p>Copyright (c) 2013 Aaron O'Leary (<a href="mailto:dev@aaren.me">dev@aaren.me</a>)</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/aaren">aaren</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
