@@ -742,6 +742,16 @@ class WaveletAnalysis(object):
         """
         if self.wavelet.C_d is not None:
             return self.wavelet.C_d
+        else:
+            return self.compute_Cdelta()
+
+    def compute_Cdelta(self):
+        """Compute the parameter C_delta (see self.C_d), used in
+        reconstruction. See section 3.i of TC98.
+
+        FIXME: this doesn't work. TC98 gives 0.776 for the morlet
+        wavelet with dj=0.6
+        """
         dj = self.dj
         dt = self.dt
         C_d = 1
