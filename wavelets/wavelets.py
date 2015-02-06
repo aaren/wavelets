@@ -500,11 +500,11 @@ class WaveletAnalysis(object):
     The equivalent fourier period is defined as where the wavelet
     power spectrum reaches its maximum and can be found analytically.
     """
-    def __init__(self, data=np.random.random(1000), time=None, dt=1,
+    def __init__(self, data=None, time=None, dt=1,
                  dj=0.125, wavelet=Morlet(), unbias=False, mask_coi=False,
                  compute_with_freq=False):
         """Arguments:
-            x - 1 dimensional input signal
+            data - 1 dimensional input signal
             time - corresponding times for the input signal
                    not essential, but the coi will be calculated
                    for time starting at zero.
