@@ -835,5 +835,35 @@ class WaveletAnalysis(object):
 
         return sC, sS
 
+    def plot_power(self, ax=None, coi=True):
+        """Create a basic wavelet power plot with time on the
+        x-axis, scale on the y-axis, and a cone of influence
+        overlaid.
+
+        Requires matplotlib.
+        """
+        import matplotlib.pyplot as plt
+
+        if not ax:
+            fig, ax = plt.subplots()
+
+        Time, Scale = np.meshgrid(self.time, self.scales)
+        ax.contourf(Time, Scale, self.wavelet_power, 100)
+
+        ax.set_yscale('log')
+        ax.grid(True)
+
+        if coi:
+            coi_time, coi_scale = self.coi
+            ax.fill_between(x=coi_time,
+                            y1=coi_scale,
+                            y2=self.scales.max(),
+                            color='gray',
+                            alpha=0.3)
+
+        ax.set_xlim(self.time.min(), self.time.max())
+
+        return ax
+
 
 # TODO: derive C_d for given wavelet
