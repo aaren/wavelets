@@ -667,7 +667,7 @@ class WaveletAnalysis(object):
         elif not self.unbias:
             return np.abs(self.wavelet_transform) ** 2
 
-    def reconstruction(self):
+    def reconstruction(self, scales=None):
         """Reconstruct the original signal from the wavelet
         transform. See S3.i.
 
@@ -690,9 +690,16 @@ class WaveletAnalysis(object):
         dt = self.dt
         C_d = self.C_d
         Y_00 = self.wavelet.time_rep(0)
-        W_n = self.wavelet_transform
         # TODO: allow specification of scales
+        if scales is not None:
+            old_scales = self.scales
+            self.scales = scales
+
         s = np.expand_dims(self.scales, 1)
+        W_n = self.wavelet_transform
+
+        if scales is not None:
+            self.scales = old_scales
 
         real_sum = np.sum(W_n.real / s ** .5, axis=0)
         x_n = real_sum * (dj * dt ** .5 / (C_d * Y_00))
