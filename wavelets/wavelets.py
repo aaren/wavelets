@@ -566,6 +566,16 @@ class WaveletAnalysis(object):
 
     @property
     def scales(self):
+        if not hasattr(self, '_scales'):
+            return self.compute_optimal_scales()
+        else:
+            return self._scales
+
+    @scales.setter
+    def scales(self, value):
+        setattr(self, '_scales', value)
+
+    def compute_optimal_scales(self):
         """Form a set of scales to use in the wavelet transform.
 
         For non-orthogonal wavelet analysis, one can use an
