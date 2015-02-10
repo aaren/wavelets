@@ -234,7 +234,8 @@ class WaveletTransform(object):
         if time is None:
             time = np.indices((data.shape[axis],)).squeeze() * dt
         self.time = time
-        self.anomaly_data = self.data - self.data.mean(axis=axis, keepdims=True)
+        self.anomaly_data = self.data - self.data.mean(axis=axis,
+                                                       keepdims=True)
         self.N = data.shape[axis]
         self.data_variance = self.data.var(axis=axis, keepdims=True)
         self.dt = dt
