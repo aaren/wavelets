@@ -11,7 +11,7 @@ from .wavelets import Morlet
 __all__ = ['cwt', 'WaveletAnalysis', 'WaveletTransform']
 
 
-def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False, axis=-1):
+def cwt(data, wavelet=None, widths=None, dt=1, frequency=False, axis=-1):
     """Continuous wavelet transform using the fourier transform
     convolution as used in Terrence and Compo.
 
@@ -33,7 +33,7 @@ def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False, axis=-1):
     wavelet : function
         Wavelet function in either time or frequency space, which
         should take 2 arguments. If the wavelet is frequency based,
-        wavelet_freq must be set to True.
+        frequency must be set to True.
 
         The first parameter is time or frequency.
 
@@ -60,9 +60,9 @@ def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False, axis=-1):
     dt: float
         sample spacing. defaults to 1 (data sample units).
 
-    wavelet_freq: boolean. Whether the wavelet function is one of
-                  time or frequency. Default, False, is for a time
-                  representation of the wavelet function.
+    frequency: boolean. Whether the wavelet function is one of
+               time or frequency. Default, False, is for a time
+               representation of the wavelet function.
 
     axis: int, the axis in the data over which to perform the 1D
           transform (default 0)
@@ -83,7 +83,7 @@ def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False, axis=-1):
     # wavelets can be complex so output is complex
     output = np.zeros((len(widths),) + data.shape, dtype=np.complex)
 
-    if wavelet_freq:
+    if frequency:
         # compute in frequency
         # next highest power of two for padding
         pN = int(2 ** np.ceil(np.log2(N)))
@@ -120,7 +120,7 @@ def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False, axis=-1):
         else:
             output = out[slices]
 
-    elif not wavelet_freq and data.ndim == 1:
+    elif not frequency and data.ndim == 1:
         # compute in time
         for ind, width in enumerate(widths):
             # number of points needed to capture wavelet
@@ -138,7 +138,7 @@ def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False, axis=-1):
         # TODO: (multi) can we really not do convolution across a
         # single axis?
         raise UserWarning('nd transform only possible in frequency space. '
-                          'Use wavelet_freq=True')
+                          'Use frequency=True')
 
     return output
 
@@ -206,7 +206,7 @@ class WaveletTransform(object):
     """
     def __init__(self, data=None, time=None, dt=1,
                  dj=0.125, wavelet=Morlet(), unbias=False,
-                 mask_coi=False, compute_with_freq=False, axis=-1):
+                 mask_coi=False, frequency=False, axis=-1):
         """Arguments:
             data - 1 dimensional input signal
             time - corresponding times for the input signal
@@ -216,13 +216,13 @@ class WaveletTransform(object):
             dj - scale resolution
             wavelet - wavelet class to use, must have an attribute
                       `time_rep`, giving a wavelet function that takes (t, s)
-                      as arguments and, if compute_with_freq is True, an
+                      as arguments and, if frequency is True, an
                       attribute `frequency_rep`, giving a wavelet function
                       that takes (w, s) as arguments.
-            unbias - whether to unbias the power spectrum, as in Liu
-                     et al. 2007 (default False)
-            compute_with_freq - default False, compute the cwt using
-                                a frequency representation
+            unbias - boolean, whether to unbias the power spectrum, as
+                     in Liu et al. 2007 (default False)
+            frequency - boolean, compute the cwt in frequency space?
+                        (default False)
             mask_coi - disregard wavelet power outside the cone of
                        influence when computing global wavelet spectrum
                        (default False)
@@ -241,7 +241,7 @@ class WaveletTransform(object):
         self.wavelet = wavelet
         # which continuous wavelet transform to use
         self.cwt = cwt
-        self.compute_with_freq = compute_with_freq
+        self.frequency = frequency
         self.unbias = unbias
         self.mask_coi = mask_coi
         self.axis = axis
@@ -350,7 +350,7 @@ class WaveletTransform(object):
         """Calculate the wavelet transform."""
         widths = self.scales
 
-        if self.compute_with_freq:
+        if self.frequency:
             wavelet = self.wavelet.frequency_rep
         else:
             wavelet = self.wavelet.time_rep
@@ -359,7 +359,7 @@ class WaveletTransform(object):
                         wavelet=wavelet,
                         widths=widths,
                         dt=self.dt,
-                        wavelet_freq=self.compute_with_freq,
+                        frequency=self.frequency,
                         axis=self.axis)
 
     @property

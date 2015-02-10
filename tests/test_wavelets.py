@@ -114,14 +114,14 @@ def compare_time_freq(N=2000):
     """Make sure that time and frequency based computation give the
     same result.
     """
-    assert(wa.compute_with_freq is True)
+    assert(wa.frequency is True)
     wavelet_time = wa.wavelet_transform
 
-    wa.compute_with_freq = False
-    assert(wa.compute_with_freq is False)
-    wavelet_freq = wa.wavelet_transform
+    wa.frequency = False
+    assert(wa.frequency is False)
+    frequency = wa.wavelet_transform
 
-    npt.assert_array_almost_equal(wavelet_time, wavelet_freq, decimal=13)
+    npt.assert_array_almost_equal(wavelet_time, frequency, decimal=13)
 
 
 def test_Cd():
@@ -158,7 +158,7 @@ def test_var_freq():
     If e.g. np.random.random is used for the input, the variance
     difference is larger.
     """
-    wa = WaveletAnalysis(anomaly_sst, compute_with_freq=True)
+    wa = WaveletAnalysis(anomaly_sst, frequency=True)
     rdiff = 1 - wa.data_variance / wa.wavelet_variance
     assert_less(rdiff, 0.01)
 
@@ -185,7 +185,7 @@ def test_reconstruction_freq():
     Check within 10% when computing with frequency representation of
     wavelet.
     """
-    wa = WaveletAnalysis(anomaly_sst, compute_with_freq=True)
+    wa = WaveletAnalysis(anomaly_sst, frequency=True)
     rdata = wa.reconstruction()
 
     err = wa.data - rdata
@@ -319,11 +319,11 @@ def test_plot_coi():
 
 def test_multi_dim():
     data = np.random.random((10, 1000))
-    wa = WaveletAnalysis(data, compute_with_freq=True)
+    wa = WaveletAnalysis(data, frequency=True)
     ns = len(wa.scales)
     assert(wa.wavelet_transform.shape == (ns, 10, 1000))
 
-    wan = WaveletAnalysis(data[0], compute_with_freq=True)
+    wan = WaveletAnalysis(data[0], frequency=True)
     assert(wan.wavelet_transform.shape == (ns, 1000))
 
     npt.assert_array_almost_equal(wa.wavelet_transform[:, 0, :],
@@ -333,13 +333,13 @@ def test_multi_dim():
 
 def test_multi_dim_axis():
     data = np.random.random((10, 1000))
-    wa = WaveletAnalysis(data, compute_with_freq=True, axis=0)
+    wa = WaveletAnalysis(data, frequency=True, axis=0)
     ns = len(wa.scales)
     print wa.wavelet_transform.shape
     print ns
     assert(wa.wavelet_transform.shape == (ns, 10, 1000))
 
-    wan = WaveletAnalysis(data[:, 0], compute_with_freq=True)
+    wan = WaveletAnalysis(data[:, 0], frequency=True)
     print wan.wavelet_transform.shape
     assert(wan.wavelet_transform.shape == (ns, 10))
 
@@ -350,13 +350,13 @@ def test_multi_dim_axis():
 
 def test_multi_dim_axis_nd():
     data = np.random.random((3, 4, 1000, 5))
-    wa = WaveletAnalysis(data, compute_with_freq=True, axis=2)
+    wa = WaveletAnalysis(data, frequency=True, axis=2)
     ns = len(wa.scales)
     print wa.wavelet_transform.shape
     print ns
     assert(wa.wavelet_transform.shape == (ns, 3, 4, 1000, 5))
 
-    wan = WaveletAnalysis(data[0, 0, :, 0], compute_with_freq=True)
+    wan = WaveletAnalysis(data[0, 0, :, 0], frequency=True)
     print wan.wavelet_transform.shape
     assert(wan.wavelet_transform.shape == (ns, 1000))
 
