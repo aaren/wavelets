@@ -80,62 +80,69 @@ def cwt(data, wavelet=None, widths=None, dt=1, frequency=False, axis=-1):
         raise UserWarning('Have to specify a wavelet function')
 
     if frequency:
-        # compute in frequency
-        # next highest power of two for padding
-        N = data.shape[axis]
-        pN = int(2 ** np.ceil(np.log2(N)))
-        # N.B. padding in fft adds zeros to the *end* of the array,
-        # not equally either end.
-        fft_data = scipy.fft(data, n=pN, axis=axis)
-        # frequencies
-        w_k = np.fft.fftfreq(pN, d=dt) * 2 * np.pi
-
-        # sample wavelet and normalise
-        norm = (2 * np.pi * widths / dt) ** .5
-        wavelet_data = norm[:, None] * wavelet(w_k, widths[:, None])
-
-        # perform the convolution in frequency space
-        slices = [slice(None)] + [None for _ in data.shape]
-        if axis == -1:
-            slices[-1] = slice(None)
-            out = scipy.ifft(fft_data[None] * wavelet_data.conj()[slices],
-                             n=pN, axis=axis)
-        else:
-            slices[axis + 1] = slice(None)
-            out = scipy.ifft(fft_data[None] * wavelet_data.conj()[slices],
-                             n=pN, axis=axis + 1)
-
-        # remove zero padding
-        slices = [slice(None) for _ in out.shape]
-        if axis == -1:
-            slices[-1] = slice(None, N)
-        else:
-            slices[axis + 1] = slice(None, N)
-
-        if data.ndim == 1:
-            return out[slices].squeeze()
-        else:
-            return out[slices]
-
+        return cwt_freq(data, wavelet, widths, dt, axis)
     elif not frequency:
-        # wavelets can be complex so output is complex
-        output = np.zeros((len(widths),) + data.shape, dtype=np.complex)
+        return cwt_time(data, wavelet, widths, dt, axis)
 
-        # compute in time
-        slices = [None for _ in data.shape]
-        slices[axis] = slice(None)
-        for ind, width in enumerate(widths):
-            # number of points needed to capture wavelet
-            M = 10 * width / dt
-            # times to use, centred at zero
-            t = np.arange((-M + 1) / 2., (M + 1) / 2.) * dt
-            # sample wavelet and normalise
-            norm = (dt / width) ** .5
-            wavelet_data = norm * wavelet(t, width)
-            output[ind, :] = scipy.signal.fftconvolve(data,
-                                                      wavelet_data[slices],
-                                                      mode='same')
-        return output
+
+def cwt_time(data, wavelet, widths, dt, axis):
+    # wavelets can be complex so output is complex
+    output = np.zeros((len(widths),) + data.shape, dtype=np.complex)
+
+    # compute in time
+    slices = [None for _ in data.shape]
+    slices[axis] = slice(None)
+    for ind, width in enumerate(widths):
+        # number of points needed to capture wavelet
+        M = 10 * width / dt
+        # times to use, centred at zero
+        t = np.arange((-M + 1) / 2., (M + 1) / 2.) * dt
+        # sample wavelet and normalise
+        norm = (dt / width) ** .5
+        wavelet_data = norm * wavelet(t, width)
+        output[ind, :] = scipy.signal.fftconvolve(data,
+                                                    wavelet_data[slices],
+                                                    mode='same')
+    return output
+
+
+def cwt_freq(data, wavelet, widths, dt, axis):
+    # compute in frequency
+    # next highest power of two for padding
+    N = data.shape[axis]
+    pN = int(2 ** np.ceil(np.log2(N)))
+    # N.B. padding in fft adds zeros to the *end* of the array,
+    # not equally either end.
+    fft_data = scipy.fft(data, n=pN, axis=axis)
+    # frequencies
+    w_k = np.fft.fftfreq(pN, d=dt) * 2 * np.pi
+
+    # sample wavelet and normalise
+    norm = (2 * np.pi * widths / dt) ** .5
+    wavelet_data = norm[:, None] * wavelet(w_k, widths[:, None])
+
+    # perform the convolution in frequency space
+    slices = [slice(None)] + [None for _ in data.shape]
+    if axis == -1:
+        slices[-1] = slice(None)
+        out = scipy.ifft(fft_data[None] * wavelet_data.conj()[slices],
+                            n=pN, axis=axis)
+    else:
+        slices[axis + 1] = slice(None)
+        out = scipy.ifft(fft_data[None] * wavelet_data.conj()[slices],
+                            n=pN, axis=axis + 1)
+
+    # remove zero padding
+    slices = [slice(None) for _ in out.shape]
+    if axis == -1:
+        slices[-1] = slice(None, N)
+    else:
+        slices[axis + 1] = slice(None, N)
+
+    if data.ndim == 1:
+        return out[slices].squeeze()
+    else:
+        return out[slices]
 
 
 class WaveletTransform(object):
