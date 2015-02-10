@@ -110,6 +110,20 @@ def compare_morlet(N=2000):
     return fig
 
 
+def compare_time_freq(N=2000):
+    """Make sure that time and frequency based computation give the
+    same result.
+    """
+    assert(wa.compute_with_freq is True)
+    wavelet_time = wa.wavelet_transform
+
+    wa.compute_with_freq = False
+    assert(wa.compute_with_freq is False)
+    wavelet_freq = wa.wavelet_transform
+
+    npt.assert_array_almost_equal(wavelet_time, wavelet_freq, decimal=13)
+
+
 def test_Cd():
     """default wavelet is morlet. Terrence and Compo calculate C_d
     for this of 0.776."""
