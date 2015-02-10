@@ -115,7 +115,10 @@ def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False, axis=-1):
         else:
             slices[axis + 1] = slice(None, N)
 
-        output = out[slices].squeeze()
+        if data.ndim == 1:
+            output = out[slices].squeeze()
+        else:
+            output = out[slices]
 
     elif not wavelet_freq and data.ndim == 1:
         # compute in time
