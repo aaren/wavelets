@@ -22,9 +22,9 @@ class Morlet(object):
             self.C_d = 0.776
 
     def __call__(self, *args, **kwargs):
-        return self.time_rep(*args, **kwargs)
+        return self.time(*args, **kwargs)
 
-    def time_rep(self, t, s=1.0, complete=True):
+    def time(self, t, s=1.0, complete=True):
         """
         Complex Morlet wavelet, centred at zero.
 
@@ -90,7 +90,7 @@ class Morlet(object):
         return 4 * np.pi * s / (self.w0 + (2 + self.w0 ** 2) ** .5)
 
     # Frequency representation
-    def frequency_rep(self, w, s=1.0):
+    def frequency(self, w, s=1.0):
         """Frequency representation of morlet.
 
         s - scale
@@ -120,9 +120,9 @@ class Paul(object):
         self.m = m
 
     def __call__(self, *args, **kwargs):
-        return self.time_rep(*args, **kwargs)
+        return self.time(*args, **kwargs)
 
-    def time_rep(self, t, s=1.0):
+    def time(self, t, s=1.0):
         """
         Complex Paul wavelet, centred at zero.
 
@@ -161,7 +161,7 @@ class Paul(object):
         return 4 * np.pi * s / (2 * self.m + 1)
 
     # Frequency representation
-    def frequency_rep(self, w, s=1.0):
+    def frequency(self, w, s=1.0):
         """Frequency representation of Paul.
 
         Parameters
@@ -217,9 +217,9 @@ class DOG(object):
         self.m = m
 
     def __call__(self, *args, **kwargs):
-        return self.time_rep(*args, **kwargs)
+        return self.time(*args, **kwargs)
 
-    def time_rep(self, t, s=1.0):
+    def time(self, t, s=1.0):
         """
         Return a DOG wavelet,
 
@@ -283,7 +283,7 @@ class DOG(object):
         """Equivalent fourier period of derivative of gaussian"""
         return 2 * np.pi * s / (self.m + 0.5) ** .5
 
-    def frequency_rep(self, w, s=1.0):
+    def frequency(self, w, s=1.0):
         """Frequency representation of derivative of gaussian.
 
         Parameters

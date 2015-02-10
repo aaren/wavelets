@@ -215,9 +215,9 @@ class WaveletTransform(object):
             dt - sample spacing
             dj - scale resolution
             wavelet - wavelet class to use, must have an attribute
-                      `time_rep`, giving a wavelet function that takes (t, s)
+                      `time`, giving a wavelet function that takes (t, s)
                       as arguments and, if frequency is True, an
-                      attribute `frequency_rep`, giving a wavelet function
+                      attribute `frequency`, giving a wavelet function
                       that takes (w, s) as arguments.
             unbias - boolean, whether to unbias the power spectrum, as
                      in Liu et al. 2007 (default False)
@@ -360,9 +360,9 @@ class WaveletTransform(object):
         widths = self.scales
 
         if self.frequency:
-            wavelet = self.wavelet.frequency_rep
+            wavelet = self.wavelet.frequency
         else:
-            wavelet = self.wavelet.time_rep
+            wavelet = self.wavelet.time
 
         return self.cwt(self.anomaly_data,
                         wavelet=wavelet,
@@ -405,7 +405,7 @@ class WaveletTransform(object):
         dj = self.dj
         dt = self.dt
         C_d = self.C_d
-        Y_00 = self.wavelet.time_rep(0)
+        Y_00 = self.wavelet.time(0)
         if scales is not None:
             old_scales = self.scales
             self.scales = scales
@@ -491,7 +491,7 @@ class WaveletTransform(object):
         s = np.expand_dims(self.scales, 1)
         s = self.scales
         # value of the wavelet function at t=0
-        Y_00 = self.wavelet.time_rep(0)
+        Y_00 = self.wavelet.time(0)
 
         real_sum = np.sum(W_d.real / s ** .5)
         C_d = real_sum * (dj * dt ** .5 / (C_d * Y_00))
@@ -506,7 +506,7 @@ class WaveletTransform(object):
         """
         N = self.N
         # wavelet as function of (s, w_k)
-        Y_ = self.wavelet.frequency_rep
+        Y_ = self.wavelet.frequency
         k = np.arange(N)
         s = self.scales
         K, S = np.meshgrid(k, s)

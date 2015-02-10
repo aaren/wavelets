@@ -23,7 +23,7 @@ def test_Morlet():
     Value at frequency = 0 should be 0.
     """
     npt.assert_almost_equal(wavelets.Morlet()(0), np.pi ** -.25, 3)
-    npt.assert_almost_equal(wavelets.Morlet().frequency_rep(0), 0, 6)
+    npt.assert_almost_equal(wavelets.Morlet().frequency(0), 0, 6)
 
 
 def test_Paul():
@@ -32,7 +32,7 @@ def test_Paul():
     Value at frequency = 0 should be 0.
     """
     npt.assert_almost_equal(wavelets.Paul(m=4)(0), 1.079, 3)
-    npt.assert_almost_equal(wavelets.Paul(m=4).frequency_rep(0), 0, 6)
+    npt.assert_almost_equal(wavelets.Paul(m=4).frequency(0), 0, 6)
 
 
 def test_DOG():
@@ -42,8 +42,8 @@ def test_DOG():
     """
     npt.assert_almost_equal(wavelets.DOG(m=2)(0), 0.867, 3)
     npt.assert_almost_equal(wavelets.DOG(m=6)(0), 0.884, 3)
-    npt.assert_almost_equal(wavelets.DOG(m=2).frequency_rep(0), 0, 6)
-    npt.assert_almost_equal(wavelets.DOG(m=6).frequency_rep(0), 0, 6)
+    npt.assert_almost_equal(wavelets.DOG(m=2).frequency(0), 0, 6)
+    npt.assert_almost_equal(wavelets.DOG(m=6).frequency(0), 0, 6)
 
 
 test_data = np.loadtxt('tests/nino3data.asc', skiprows=3)
@@ -411,7 +411,7 @@ def plot_morlet():
     """
     TODO: make a pretty plot of the morlet for the README
     """
-    morlet = wavelets.Morlet().time_rep
+    morlet = wavelets.Morlet().time
     s = 1
     T = np.linspace(-5 * s, 5 * s, 200)
     Y = morlet(T, s=s)
