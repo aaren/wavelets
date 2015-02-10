@@ -12,7 +12,7 @@ __all__ = ['cwt', 'Morlet', 'Paul', 'DOG',
            'WaveletAnalysis']
 
 
-def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False):
+def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False, axis=-1):
     """Continuous wavelet transform using the fourier transform
     convolution as used in Terrence and Compo.
 
@@ -65,6 +65,9 @@ def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False):
                   time or frequency. Default, False, is for a time
                   representation of the wavelet function.
 
+    axis: int, the axis in the data over which to perform the 1D
+          transform (default 0)
+
     Returns
     -------
     cwt: (M, N) ndarray
@@ -77,11 +80,9 @@ def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False):
     if not wavelet:
         raise UserWarning('Have to specify a wavelet function')
 
-    # TODO: (multi) data axis
-
-    N = data.size
+    N = data.shape[axis]
     # wavelets can be complex so output is complex
-    output = np.zeros((len(widths), N), dtype=np.complex)
+    output = np.zeros((len(widths),) + data.shape, dtype=np.complex)
 
     if wavelet_freq:
         # compute in frequency
@@ -89,7 +90,7 @@ def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False):
         pN = int(2 ** np.ceil(np.log2(N)))
         # N.B. padding in fft adds zeros to the *end* of the array,
         # not equally either end.
-        fft_data = scipy.fft(data, n=pN)
+        fft_data = scipy.fft(data, n=pN, axis=axis)
         # frequencies
         w_k = np.fft.fftfreq(pN, d=dt) * 2 * np.pi
 
@@ -98,11 +99,26 @@ def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False):
         wavelet_data = norm[:, None] * wavelet(w_k, widths[:, None])
 
         # perform the convolution in frequency space
-        out = scipy.ifft(fft_data * wavelet_data.conj(), n=pN)
-        # remove zero padding
-        output = out[:, :N]
+        slices = [slice(None)] + [None for _ in data.shape]
+        if axis == -1:
+            slices[-1] = slice(None)
+            out = scipy.ifft(fft_data[None] * wavelet_data.conj()[slices],
+                            n=pN, axis=axis)
+        else:
+            slices[axis + 1] = slice(None)
+            out = scipy.ifft(fft_data[None] * wavelet_data.conj()[slices],
+                            n=pN, axis=axis + 1)
 
-    elif not wavelet_freq:
+        # remove zero padding
+        slices = [slice(None) for _ in out.shape]
+        if axis == -1:
+            slices[-1] = slice(None, N)
+        else:
+            slices[axis + 1] = slice(None, N)
+
+        output = out[slices].squeeze()
+
+    elif not wavelet_freq and data.ndim == 1:
         # compute in time
         for ind, width in enumerate(widths):
             # number of points needed to capture wavelet
@@ -115,6 +131,12 @@ def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False):
             output[ind, :] = scipy.signal.fftconvolve(data,
                                                       wavelet_data,
                                                       mode='same')
+
+    else:
+        # TODO: (multi) can we really not do convolution across a
+        # single axis?
+        raise UserWarning('nd transform only possible in frequency space. '
+                          'Use wavelet_freq=True')
 
     return output
 
@@ -506,7 +528,7 @@ class WaveletAnalysis(object):
     """
     def __init__(self, data=None, time=None, dt=1,
                  dj=0.125, wavelet=Morlet(), unbias=False, mask_coi=False,
-                 compute_with_freq=False):
+                 compute_with_freq=False, axis=-1):
         """Arguments:
             data - 1 dimensional input signal
             time - corresponding times for the input signal
@@ -526,16 +548,16 @@ class WaveletAnalysis(object):
             mask_coi - disregard wavelet power outside the cone of
                        influence when computing global wavelet spectrum
                        (default False)
+            axis - axis of the input data to transform over (default -1)
             TODO: allow override s0
         """
         self.data = data
         if time is None:
-            # TODO: (multi) use arange?
-            time = np.indices(data.shape).squeeze() * dt
+            time = np.indices((data.shape[axis],)).squeeze() * dt
         self.time = time
-        self.anomaly_data = self.data - self.data.mean()  # TODO: (multi) use axis
-        self.N = len(data)  # TODO: (multi) use data.shape, axis
-        self.data_variance = self.data.var()  # TODO: (multi)
+        self.anomaly_data = self.data - self.data.mean(axis=axis, keepdims=True)
+        self.N = data.shape[axis]
+        self.data_variance = self.data.var(axis=axis, keepdims=True)
         self.dt = dt
         self.dj = dj
         self.wavelet = wavelet
@@ -544,10 +566,11 @@ class WaveletAnalysis(object):
         self.compute_with_freq = compute_with_freq
         self.unbias = unbias
         self.mask_coi = mask_coi
+        self.axis = axis
 
     @property
     def fourier_period(self):
-        """Return a function that calculates the equivalent fourier  # TODO: (multi)
+        """Return a function that calculates the equivalent fourier
         period as a function of scale.
         """
         return getattr(self.wavelet, 'fourier_period')
@@ -658,7 +681,8 @@ class WaveletAnalysis(object):
                         wavelet=wavelet,
                         widths=widths,
                         dt=self.dt,
-                        wavelet_freq=self.compute_with_freq)
+                        wavelet_freq=self.compute_with_freq,
+                        axis=self.axis)
 
     @property
     def wavelet_power(self):
@@ -710,7 +734,7 @@ class WaveletAnalysis(object):
         x_n = real_sum * (dj * dt ** .5 / (C_d * Y_00))
 
         # add the mean back on (x_n is anomaly time series)
-        x_n += self.data.mean()  # TODO: (multi)
+        x_n += self.data.mean(axis=self.axis, keepdims=True)
 
         return x_n
 
