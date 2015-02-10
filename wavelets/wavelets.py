@@ -90,13 +90,15 @@ def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False):
         fft_data = scipy.fft(data, n=pN)
         # frequencies
         w_k = np.fft.fftfreq(pN, d=dt) * 2 * np.pi
-        for ind, width in enumerate(widths):
-            # sample wavelet and normalise
-            norm = (2 * np.pi * width / dt) ** .5
-            wavelet_data = norm * wavelet(w_k, width)
-            out = scipy.ifft(fft_data * wavelet_data.conj(), n=pN)
-            # remove zero padding
-            output[ind, :] = out[:N]
+
+        # sample wavelet and normalise
+        norm = (2 * np.pi * widths / dt) ** .5
+        wavelet_data = norm[:, None] * wavelet(w_k, widths[:, None])
+
+        # perform the convolution in frequency space
+        out = scipy.ifft(fft_data * wavelet_data.conj(), n=pN)
+        # remove zero padding
+        output = out[:, :N]
 
     elif not wavelet_freq:
         # compute in time
