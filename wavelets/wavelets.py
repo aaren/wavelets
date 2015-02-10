@@ -77,6 +77,8 @@ def cwt(data, wavelet=None, widths=None, dt=1, wavelet_freq=False):
     if not wavelet:
         raise UserWarning('Have to specify a wavelet function')
 
+    # TODO: (multi) data axis
+
     N = data.size
     # wavelets can be complex so output is complex
     output = np.zeros((len(widths), N), dtype=np.complex)
@@ -528,11 +530,12 @@ class WaveletAnalysis(object):
         """
         self.data = data
         if time is None:
+            # TODO: (multi) use arange?
             time = np.indices(data.shape).squeeze() * dt
         self.time = time
-        self.anomaly_data = self.data - self.data.mean()
-        self.N = len(data)
-        self.data_variance = self.data.var()
+        self.anomaly_data = self.data - self.data.mean()  # TODO: (multi) use axis
+        self.N = len(data)  # TODO: (multi) use data.shape, axis
+        self.data_variance = self.data.var()  # TODO: (multi)
         self.dt = dt
         self.dj = dj
         self.wavelet = wavelet
@@ -544,7 +547,7 @@ class WaveletAnalysis(object):
 
     @property
     def fourier_period(self):
-        """Return a function that calculates the equivalent fourier
+        """Return a function that calculates the equivalent fourier  # TODO: (multi)
         period as a function of scale.
         """
         return getattr(self.wavelet, 'fourier_period')
@@ -707,7 +710,7 @@ class WaveletAnalysis(object):
         x_n = real_sum * (dj * dt ** .5 / (C_d * Y_00))
 
         # add the mean back on (x_n is anomaly time series)
-        x_n += self.data.mean()
+        x_n += self.data.mean()  # TODO: (multi)
 
         return x_n
 
