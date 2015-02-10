@@ -413,13 +413,14 @@ class WaveletTransform(object):
             old_scales = self.scales
             self.scales = scales
 
-        s = np.expand_dims(self.scales, 1)
+        s = self.scales
         W_n = self.wavelet_transform
 
         if scales is not None:
             self.scales = old_scales
 
-        real_sum = np.sum(W_n.real / s ** .5, axis=0)
+        # use the transpose to allow broadcasting
+        real_sum = np.sum(W_n.real.T / s ** .5, axis=-1).T
         x_n = real_sum * (dj * dt ** .5 / (C_d * Y_00))
 
         # add the mean back on (x_n is anomaly time series)
