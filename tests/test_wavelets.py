@@ -317,6 +317,54 @@ def test_plot_coi():
     fig.savefig('tests/test_coi.png')
 
 
+def test_multi_dim():
+    data = np.random.random((10, 1000))
+    wa = WaveletAnalysis(data, compute_with_freq=True)
+    ns = len(wa.scales)
+    assert(wa.wavelet_transform.shape == (ns, 10, 1000))
+
+    wan = WaveletAnalysis(data[0], compute_with_freq=True)
+    assert(wan.wavelet_transform.shape == (ns, 1000))
+
+    npt.assert_array_almost_equal(wa.wavelet_transform[:, 0, :],
+                                  wan.wavelet_transform[:, :],
+                                  decimal=13)
+
+
+def test_multi_dim_axis():
+    data = np.random.random((10, 1000))
+    wa = WaveletAnalysis(data, compute_with_freq=True, axis=0)
+    ns = len(wa.scales)
+    print wa.wavelet_transform.shape
+    print ns
+    assert(wa.wavelet_transform.shape == (ns, 10, 1000))
+
+    wan = WaveletAnalysis(data[:, 0], compute_with_freq=True)
+    print wan.wavelet_transform.shape
+    assert(wan.wavelet_transform.shape == (ns, 10))
+
+    npt.assert_array_almost_equal(wa.wavelet_transform[:, :, 0],
+                                  wan.wavelet_transform[:, :],
+                                  decimal=13)
+
+
+def test_multi_dim_axis_nd():
+    data = np.random.random((3, 4, 1000, 5))
+    wa = WaveletAnalysis(data, compute_with_freq=True, axis=2)
+    ns = len(wa.scales)
+    print wa.wavelet_transform.shape
+    print ns
+    assert(wa.wavelet_transform.shape == (ns, 3, 4, 1000, 5))
+
+    wan = WaveletAnalysis(data[0, 0, :, 0], compute_with_freq=True)
+    print wan.wavelet_transform.shape
+    assert(wan.wavelet_transform.shape == (ns, 1000))
+
+    npt.assert_array_almost_equal(wa.wavelet_transform[:, 0, 0, :, 0],
+                                  wan.wavelet_transform[:, :],
+                                  decimal=13)
+
+
 def analyse_song():
     """Compute the wavelet transform of a song."""
     fs, song = wavfile.read('alarma.wav')
