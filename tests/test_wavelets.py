@@ -365,6 +365,23 @@ def test_multi_dim_axis_nd():
                                   decimal=13)
 
 
+def test_multi_dim_axis_nd_time():
+    data = np.random.random((3, 4, 100, 5))
+    wa = WaveletAnalysis(data, frequency=False, axis=2)
+    ns = len(wa.scales)
+    print wa.wavelet_transform.shape
+    print ns
+    assert(wa.wavelet_transform.shape == (ns, 3, 4, 100, 5))
+
+    wan = WaveletAnalysis(data[0, 0, :, 0], frequency=False)
+    print wan.wavelet_transform.shape
+    assert(wan.wavelet_transform.shape == (ns, 100))
+
+    npt.assert_array_almost_equal(wa.wavelet_transform[:, 0, 0, :, 0],
+                                  wan.wavelet_transform[:, :],
+                                  decimal=13)
+
+
 def analyse_song():
     """Compute the wavelet transform of a song."""
     fs, song = wavfile.read('alarma.wav')

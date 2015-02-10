@@ -120,8 +120,10 @@ def cwt(data, wavelet=None, widths=None, dt=1, frequency=False, axis=-1):
         else:
             output = out[slices]
 
-    elif not frequency and data.ndim == 1:
+    elif not frequency:
         # compute in time
+        slices = [None for _ in data.shape]
+        slices[axis] = slice(None)
         for ind, width in enumerate(widths):
             # number of points needed to capture wavelet
             M = 10 * width / dt
@@ -131,14 +133,8 @@ def cwt(data, wavelet=None, widths=None, dt=1, frequency=False, axis=-1):
             norm = (dt / width) ** .5
             wavelet_data = norm * wavelet(t, width)
             output[ind, :] = scipy.signal.fftconvolve(data,
-                                                      wavelet_data,
+                                                      wavelet_data[slices],
                                                       mode='same')
-
-    else:
-        # TODO: (multi) can we really not do convolution across a
-        # single axis?
-        raise UserWarning('nd transform only possible in frequency space. '
-                          'Use frequency=True')
 
     return output
 
