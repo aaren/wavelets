@@ -79,13 +79,10 @@ def cwt(data, wavelet=None, widths=None, dt=1, frequency=False, axis=-1):
     if not wavelet:
         raise UserWarning('Have to specify a wavelet function')
 
-    N = data.shape[axis]
-    # wavelets can be complex so output is complex
-    output = np.zeros((len(widths),) + data.shape, dtype=np.complex)
-
     if frequency:
         # compute in frequency
         # next highest power of two for padding
+        N = data.shape[axis]
         pN = int(2 ** np.ceil(np.log2(N)))
         # N.B. padding in fft adds zeros to the *end* of the array,
         # not equally either end.
@@ -116,11 +113,14 @@ def cwt(data, wavelet=None, widths=None, dt=1, frequency=False, axis=-1):
             slices[axis + 1] = slice(None, N)
 
         if data.ndim == 1:
-            output = out[slices].squeeze()
+            return out[slices].squeeze()
         else:
-            output = out[slices]
+            return out[slices]
 
     elif not frequency:
+        # wavelets can be complex so output is complex
+        output = np.zeros((len(widths),) + data.shape, dtype=np.complex)
+
         # compute in time
         slices = [None for _ in data.shape]
         slices[axis] = slice(None)
@@ -135,8 +135,7 @@ def cwt(data, wavelet=None, widths=None, dt=1, frequency=False, axis=-1):
             output[ind, :] = scipy.signal.fftconvolve(data,
                                                       wavelet_data[slices],
                                                       mode='same')
-
-    return output
+        return output
 
 
 class WaveletTransform(object):
