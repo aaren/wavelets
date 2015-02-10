@@ -227,7 +227,6 @@ class WaveletTransform(object):
                        influence when computing global wavelet spectrum
                        (default False)
             axis - axis of the input data to transform over (default -1)
-            TODO: allow override s0
         """
         self.data = data
         if time is None:
@@ -260,6 +259,16 @@ class WaveletTransform(object):
 
     @property
     def s0(self):
+        if not hasattr(self, '_s0'):
+            return self.find_s0()
+        else:
+            return self._s0
+
+    @s0.setter
+    def s0(self, value):
+        setattr(self, '_s0', value)
+
+    def find_s0(self):
         """Find the smallest resolvable scale by finding where the
         equivalent fourier period is equal to 2 * dt. For a Morlet
         wavelet, this is roughly 1.
@@ -397,7 +406,6 @@ class WaveletTransform(object):
         dt = self.dt
         C_d = self.C_d
         Y_00 = self.wavelet.time_rep(0)
-        # TODO: allow specification of scales
         if scales is not None:
             old_scales = self.scales
             self.scales = scales
