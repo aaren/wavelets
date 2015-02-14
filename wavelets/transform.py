@@ -380,9 +380,8 @@ class WaveletTransform(object):
         the bias correction factor introduced by Liu et al. 2007,
         which is to divide by the scale.
         """
-        s = np.expand_dims(self.scales, 1)
         if self.unbias:
-            return np.abs(self.wavelet_transform) ** 2 / s
+            return (np.abs(self.wavelet_transform).T ** 2 / self.scales).T
         elif not self.unbias:
             return np.abs(self.wavelet_transform) ** 2
 
@@ -490,15 +489,14 @@ class WaveletTransform(object):
         """
         dj = self.dj
         dt = self.dt
-        C_d = 1
-        W_d = self.wavelet_transform_delta
-        s = np.expand_dims(self.scales, 1)
         s = self.scales
+        W_d = self.wavelet_transform_delta
+
         # value of the wavelet function at t=0
         Y_00 = self.wavelet.time(0)
 
         real_sum = np.sum(W_d.real / s ** .5)
-        C_d = real_sum * (dj * dt ** .5 / (C_d * Y_00))
+        C_d = real_sum * (dj * dt ** .5 / Y_00)
         # TODO: coming out as 0.26 for morlet
         return C_d
 
@@ -508,18 +506,14 @@ class WaveletTransform(object):
 
         Returns an array of the transform computed over the scales.
         """
-        N = self.N
-        # wavelet as function of (s, w_k)
-        Y_ = self.wavelet.frequency
-        k = np.arange(N)
-        s = self.scales
-        K, S = np.meshgrid(k, s)
+        Y_ = self.wavelet.frequency  # wavelet as f(w_k, s)
+
+        WK, S = np.meshgrid(self.w_k(), self.scales)
 
         # compute Y_ over all s, w_k and sum over k
-        W_d = (1 / N) * np.sum(Y_(self.w_k(K), S), axis=1)
+        W_d = (1 / self.N) * np.sum(Y_(WK, S), axis=1)
 
-        # N.B This W_d is 1D
-
+        # N.B This W_d is 1D (defined only at n=0)
         return W_d
 
     @property
