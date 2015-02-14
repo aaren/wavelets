@@ -326,33 +326,16 @@ class WaveletTransform(object):
         sj = s0 * 2 ** (dj * np.arange(0, J + 1))
         return sj
 
-    # TODO: use np.frompyfunc on this
-    # TODO: can we just replace it with fftfreqs?
-    def w_k(self, k=None):
+    @property
+    def w_k(self):
         """Angular frequency as a function of Fourier index.
 
-        If no k, returns an array of all the angular frequencies
-        calculated using the length of the data.
-
         See eq5 of TC.
+
+        N.B the frequencies returned by numpy are adimensional, on
+        the interval [-1/2, 1/2], so we multiply by 2 * pi.
         """
-        dt = self.dt
-        N = self.N
-        a = 2 * np.pi / (N * dt)
-        if k is None:
-            k = np.arange(N)
-            w_k = np.arange(N) * a
-            w_k[np.where(k > N // 2)] *= -1
-        elif type(k) is np.ndarray:
-            w_k = a * k
-            w_k[np.where(k > N // 2)] *= -1
-        else:
-            w_k = a * k
-            if k <= N // 2:
-                pass
-            elif k > N // 2:
-                w_k *= -1
-        return w_k
+        return 2 * np.pi * np.fft.fftfreq(self.N, self.dt)
 
     @property
     def wavelet_transform(self):
@@ -504,7 +487,7 @@ class WaveletTransform(object):
         """
         Y_0 = self.wavelet.frequency  # wavelet as f(w_k, s)
 
-        WK, S = np.meshgrid(self.w_k(), self.scales)
+        WK, S = np.meshgrid(self.w_k, self.scales)
 
         # compute Y_ over all s, w_k and sum over k
         norm = (2 * np.pi * S / self.dt) ** .5
