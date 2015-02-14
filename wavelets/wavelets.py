@@ -98,7 +98,9 @@ class Morlet(object):
         """
         x = w * s
         # heaviside mock
-        Hw = 0.5 * (np.sign(x) + 1)
+        Hw = np.array(w)
+        Hw[w <= 0] = 0
+        Hw[w > 0] = 1
         return np.pi ** -.25 * Hw * np.exp((-(x - self.w0) ** 2) / 2)
 
     def coi(self, s):
