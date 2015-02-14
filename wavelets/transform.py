@@ -485,7 +485,7 @@ class WaveletTransform(object):
         reconstruction. See section 3.i of TC98.
 
         FIXME: this doesn't work. TC98 gives 0.776 for the morlet
-        wavelet with dj=0.6
+        wavelet with dj=0.125.
         """
         dj = self.dj
         dt = self.dt
