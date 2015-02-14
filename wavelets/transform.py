@@ -475,7 +475,7 @@ class WaveletTransform(object):
         C_d is scale independent and a constant for each wavelet
         function.
         """
-        if self.wavelet.C_d is not None:
+        if hasattr(self.wavelet, 'C_d'):
             return self.wavelet.C_d
         else:
             return self.compute_Cdelta()
