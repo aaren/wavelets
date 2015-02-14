@@ -497,7 +497,6 @@ class WaveletTransform(object):
 
         real_sum = np.sum(W_d.real / s ** .5)
         C_d = real_sum * (dj * dt ** .5 / Y_00)
-        # TODO: coming out as 0.26 for morlet
         return C_d
 
     @property
@@ -506,12 +505,13 @@ class WaveletTransform(object):
 
         Returns an array of the transform computed over the scales.
         """
-        Y_ = self.wavelet.frequency  # wavelet as f(w_k, s)
+        Y_0 = self.wavelet.frequency  # wavelet as f(w_k, s)
 
         WK, S = np.meshgrid(self.w_k(), self.scales)
 
         # compute Y_ over all s, w_k and sum over k
-        W_d = (1 / self.N) * np.sum(Y_(WK, S), axis=1)
+        norm = (2 * np.pi * S / self.dt) ** .5  # normalisation factor with dt=1
+        W_d = (1 / self.N) * np.sum(norm * Y_0(WK, S), axis=1)
 
         # N.B This W_d is 1D (defined only at n=0)
         return W_d
