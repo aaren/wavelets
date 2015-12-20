@@ -121,20 +121,20 @@ def cwt_freq(data, wavelet, widths, dt, axis):
     norm = (2 * np.pi * widths / dt) ** .5
     wavelet_data = norm[:, None] * wavelet(w_k, widths[:, None])
 
-    # convert negative axis
-    axis = axis % data.ndim
+    # Convert negative axis. Add one to account for
+    # inclusion of widths axis above.
+    axis = (axis % data.ndim) + 1
 
     # perform the convolution in frequency space
     slices = [slice(None)] + [None for _ in data.shape]
-
-    slices[axis + 1] = slice(None)
+    slices[axis] = slice(None)
 
     out = scipy.ifft(fft_data[None] * wavelet_data.conj()[slices],
-                     n=pN, axis=axis + 1)
+                     n=pN, axis=axis)
 
     # remove zero padding
     slices = [slice(None) for _ in out.shape]
-    slices[axis + 1] = slice(None, N)
+    slices[axis] = slice(None, N)
 
     if data.ndim == 1:
         return out[slices].squeeze()
