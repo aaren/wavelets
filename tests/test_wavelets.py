@@ -335,12 +335,12 @@ def test_multi_dim_axis():
     data = np.random.random((10, 100))
     wa = WaveletAnalysis(data, frequency=True, axis=0)
     ns = len(wa.scales)
-    print wa.wavelet_transform.shape
-    print ns
+    print (wa.wavelet_transform.shape)
+    print (ns)
     assert(wa.wavelet_transform.shape == (ns, 10, 100))
 
     wan = WaveletAnalysis(data[:, 0], frequency=True)
-    print wan.wavelet_transform.shape
+    print (wan.wavelet_transform.shape)
     assert(wan.wavelet_transform.shape == (ns, 10))
 
     npt.assert_array_almost_equal(wa.wavelet_transform[:, :, 0],
@@ -352,12 +352,12 @@ def test_multi_dim_axis_nd():
     data = np.random.random((3, 4, 100, 5))
     wa = WaveletAnalysis(data, frequency=True, axis=2)
     ns = len(wa.scales)
-    print wa.wavelet_transform.shape
-    print ns
+    print (wa.wavelet_transform.shape)
+    print (ns)
     assert(wa.wavelet_transform.shape == (ns, 3, 4, 100, 5))
 
     wan = WaveletAnalysis(data[0, 0, :, 0], frequency=True)
-    print wan.wavelet_transform.shape
+    print (wan.wavelet_transform.shape)
     assert(wan.wavelet_transform.shape == (ns, 100))
 
     npt.assert_array_almost_equal(wa.wavelet_transform[:, 0, 0, :, 0],
@@ -369,12 +369,12 @@ def test_multi_dim_axis_nd_time():
     data = np.random.random((3, 4, 100, 5))
     wa = WaveletAnalysis(data, frequency=False, axis=2)
     ns = len(wa.scales)
-    print wa.wavelet_transform.shape
-    print ns
+    print (wa.wavelet_transform.shape)
+    print (ns)
     assert(wa.wavelet_transform.shape == (ns, 3, 4, 100, 5))
 
     wan = WaveletAnalysis(data[0, 0, :, 0], frequency=False)
-    print wan.wavelet_transform.shape
+    print (wan.wavelet_transform.shape)
     assert(wan.wavelet_transform.shape == (ns, 100))
 
     npt.assert_array_almost_equal(wa.wavelet_transform[:, 0, 0, :, 0],
