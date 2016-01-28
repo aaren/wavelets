@@ -90,6 +90,14 @@ class Morlet(object):
         """Equivalent Fourier period of Morlet"""
         return 4 * np.pi * s / (self.w0 + (2 + self.w0 ** 2) ** .5)
 
+    def scale_from_period(self, period):
+        """
+        Compute the scale from the fourier period.
+        Returns the scale
+        """
+        # Solve 4 * np.pi * scale / (w0 + (2 + w0 ** 2) ** .5) for s to obtain this formula
+        return (period * (np.sqrt(self.w0 * self.w0 + 2) + w0)) / (4. * np.pi)
+
     # Frequency representation
     def frequency(self, w, s=1.0):
         """Frequency representation of Morlet.
@@ -174,6 +182,9 @@ class Paul(object):
     def fourier_period(self, s):
         """Equivalent Fourier period of Paul"""
         return 4 * np.pi * s / (2 * self.m + 1)
+
+    def scale_from_period(self, period):
+        raise NotImplementedError()
 
     # Frequency representation
     def frequency(self, w, s=1.0):
@@ -298,6 +309,9 @@ class DOG(object):
     def fourier_period(self, s):
         """Equivalent Fourier period of derivative of Gaussian"""
         return 2 * np.pi * s / (self.m + 0.5) ** .5
+
+    def scale_from_period(self, period):
+        raise NotImplementedError()
 
     def frequency(self, w, s=1.0):
         """Frequency representation of derivative of Gaussian.
