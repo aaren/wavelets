@@ -96,7 +96,7 @@ class Morlet(object):
         Returns the scale
         """
         # Solve 4 * np.pi * scale / (w0 + (2 + w0 ** 2) ** .5) for s to obtain this formula
-        return (period * (np.sqrt(self.w0 * self.w0 + 2) + w0)) / (4. * np.pi)
+        return (period * (np.sqrt(self.w0 * self.w0 + 2) + self.w0)) / (4. * np.pi)
 
     # Frequency representation
     def frequency(self, w, s=1.0):
