@@ -46,7 +46,7 @@ def test_DOG():
     npt.assert_almost_equal(wavelets.DOG(m=6).frequency(0), 0, 6)
 
 
-test_data = np.loadtxt('tests/nino3data.asc', skiprows=3)
+test_data = np.loadtxt('nino3data.asc', skiprows=3)
 
 nino_time = test_data[:, 0]
 nino_dt = np.diff(nino_time).mean()
