@@ -14,7 +14,7 @@ class Morlet(object):
     def __init__(self, w0=6):
         """w0 is the nondimensional frequency constant. If this is
         set too low then the wavelet does not sample very well: a
-        value over 5 should be ok, Terrence and Compo set it to 6.
+        value over 5 should be ok; Terrence and Compo set it to 6.
         """
         self.w0 = w0
         if w0 == 6:
@@ -40,7 +40,8 @@ class Morlet(object):
 
         Returns
         -------
-        complex: value of the morlet wavelet at the given time
+        out : complex
+            Value of the Morlet wavelet at the given time
 
         See Also
         --------
@@ -54,18 +55,18 @@ class Morlet(object):
 
         This commonly used wavelet is often referred to simply as the
         Morlet wavelet.  Note that this simplified version can cause
-        admissibility problems at low values of w.
+        admissibility problems at low values of `w`.
 
         The complete version::
 
             pi**-0.25 * (exp(1j*w*x) - exp(-0.5*(w**2))) * exp(-0.5*(x**2))
 
         The complete version of the Morlet wavelet, with a correction
-        term to improve admissibility. For w greater than 5, the
+        term to improve admissibility. For `w` greater than 5, the
         correction term is negligible.
 
         Note that the energy of the return wavelet is not normalised
-        according to s.
+        according to `s`.
 
         The fundamental frequency of this wavelet in Hz is given
         by ``f = 2*s*w*r / M`` where r is the sampling rate.
@@ -86,18 +87,29 @@ class Morlet(object):
 
     # Fourier wavelengths
     def fourier_period(self, s):
-        """Equivalent fourier period of morlet"""
+        """Equivalent Fourier period of Morlet"""
         return 4 * np.pi * s / (self.w0 + (2 + self.w0 ** 2) ** .5)
 
     # Frequency representation
     def frequency(self, w, s=1.0):
-        """Frequency representation of morlet.
+        """Frequency representation of Morlet.
 
-        s - scale
-        w - angular frequency
+        Parameters
+        ----------
+        w : float
+            Angular frequency. If `s` is not specified, i.e. set to 1,
+            this can be used as the non-dimensional angular
+            frequency w * s.
+        s : float
+            Scaling factor. Default is 1.
+
+        Returns
+        -------
+        out : complex
+            Value of the Morlet wavelet at the given frequency
         """
         x = w * s
-        # heaviside mock
+        # Heaviside mock
         Hw = np.array(w)
         Hw[w <= 0] = 0
         Hw[w > 0] = 1
@@ -117,7 +129,7 @@ class Morlet(object):
 
 class Paul(object):
     def __init__(self, m=4):
-        """Initialise a Paul wavelet function of order m.
+        """Initialise a Paul wavelet function of order `m`.
         """
         self.m = m
 
@@ -131,14 +143,15 @@ class Paul(object):
         Parameters
         ----------
         t : float
-            Time. If s is not specified, i.e. set to 1, this can be
+            Time. If `s` is not specified, i.e. set to 1, this can be
             used as the non-dimensional time t/s.
         s : float
             Scaling factor. Default is 1.
 
         Returns
         -------
-        complex: value of the paul wavelet at the given time
+        out : complex
+            Value of the Paul wavelet at the given time
 
         The Paul wavelet is defined (in time) as::
 
@@ -159,7 +172,7 @@ class Paul(object):
 
     # Fourier wavelengths
     def fourier_period(self, s):
-        """Equivalent fourier period of Paul"""
+        """Equivalent Fourier period of Paul"""
         return 4 * np.pi * s / (2 * self.m + 1)
 
     # Frequency representation
@@ -169,7 +182,7 @@ class Paul(object):
         Parameters
         ----------
         w : float
-            Angular frequency. If s is not specified, i.e. set to 1,
+            Angular frequency. If `s` is not specified, i.e. set to 1,
             this can be used as the non-dimensional angular
             frequency w * s.
         s : float
@@ -177,12 +190,13 @@ class Paul(object):
 
         Returns
         -------
-        complex: value of the paul wavelet at the given time
+        out : complex
+            Value of the Paul wavelet at the given frequency
 
         """
         m = self.m
         x = w * s
-        # heaviside mock
+        # Heaviside mock
         Hw = 0.5 * (np.sign(x) + 1)
 
         # prefactor
@@ -208,7 +222,7 @@ class Paul(object):
 
 class DOG(object):
     def __init__(self, m=2):
-        """Initialise a Derivative of Gaussian wavelet of order m."""
+        """Initialise a Derivative of Gaussian wavelet of order `m`."""
         if m == 2:
             # value of C_d from TC98
             self.C_d = 3.541
@@ -223,7 +237,7 @@ class DOG(object):
 
     def time(self, t, s=1.0):
         """
-        Return a DOG wavelet,
+        Return a Derivative of Gaussian wavelet,
 
         When m = 2, this is also known as the "Mexican hat", "Marr"
         or "Ricker" wavelet.
@@ -236,24 +250,24 @@ class DOG(object):
         and   ``x = t / s``.
 
         Note that the energy of the return wavelet is not normalised
-        according to s.
+        according to `s`.
 
         Parameters
         ----------
         t : float
-            Time. If s is not specified, this can be used as the
+            Time. If `s` is not specified, this can be used as the
             non-dimensional time t/s.
         s : scalar
             Width parameter of the wavelet.
 
         Returns
         -------
-        float : value of the ricker wavelet at the given time
-
+        out : float
+            Value of the DOG wavelet at the given time
 
         Notes
         -----
-        The derivative of the gaussian has a polynomial representation:
+        The derivative of the Gaussian has a polynomial representation:
 
         from http://en.wikipedia.org/wiki/Gaussian_function:
 
@@ -271,8 +285,8 @@ class DOG(object):
         x = t / s
         m = self.m
 
-        # compute the hermite polynomial (used to evaluate the
-        # derivative of a gaussian)
+        # compute the Hermite polynomial (used to evaluate the
+        # derivative of a Gaussian)
         He_n = scipy.special.hermitenorm(m)
         gamma = scipy.special.gamma
 
@@ -282,16 +296,16 @@ class DOG(object):
         return const * function
 
     def fourier_period(self, s):
-        """Equivalent fourier period of derivative of gaussian"""
+        """Equivalent Fourier period of derivative of Gaussian"""
         return 2 * np.pi * s / (self.m + 0.5) ** .5
 
     def frequency(self, w, s=1.0):
-        """Frequency representation of derivative of gaussian.
+        """Frequency representation of derivative of Gaussian.
 
         Parameters
         ----------
         w : float
-            Angular frequency. If s is not specified, i.e. set to 1,
+            Angular frequency. If `s` is not specified, i.e. set to 1,
             this can be used as the non-dimensional angular
             frequency w * s.
         s : float
@@ -299,8 +313,9 @@ class DOG(object):
 
         Returns
         -------
-        complex: value of the derivative of gaussian wavelet at the
-                 given time
+        out : complex
+            Value of the derivative of Gaussian wavelet at the
+            given time
         """
         m = self.m
         x = s * w
@@ -324,7 +339,7 @@ class DOG(object):
 class Ricker(DOG):
     def __init__(self):
         """The Ricker, aka Marr / Mexican Hat, wavelet is a
-        derivative of gaussian order 2.
+        derivative of Gaussian order 2.
         """
         DOG.__init__(self, m=2)
         # value of C_d from TC98

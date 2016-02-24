@@ -12,7 +12,7 @@ __all__ = ['cwt', 'WaveletAnalysis', 'WaveletTransform']
 
 
 def cwt(data, wavelet=None, widths=None, dt=1, frequency=False, axis=-1):
-    """Continuous wavelet transform using the fourier transform
+    """Continuous wavelet transform using the Fourier transform
     convolution as used in Terrence and Compo.
 
     (as opposed to the direct convolution method used by
@@ -38,7 +38,7 @@ def cwt(data, wavelet=None, widths=None, dt=1, frequency=False, axis=-1):
         The first parameter is time or frequency.
 
         The second is a width parameter, defining the size of the wavelet
-        (e.g. standard deviation of a gaussian).
+        (e.g. standard deviation of a Gaussian).
 
         The wavelet function, Y, should be such that
         Int[-inf][inf](|Y|^2) = 1
@@ -101,8 +101,8 @@ def cwt_time(data, wavelet, widths, dt, axis):
         norm = (dt / width) ** .5
         wavelet_data = norm * wavelet(t, width)
         output[ind, :] = scipy.signal.fftconvolve(data,
-                                                    wavelet_data[slices],
-                                                    mode='same')
+                                                  wavelet_data[slices],
+                                                  mode='same')
     return output
 
 
@@ -164,7 +164,7 @@ class WaveletTransform(object):
 
     A *complex* wavelet function will return information about both
     amplitude and phase and is better adapted for capturing
-    *osillatory behaviour*.
+    *oscillatory behaviour*.
 
     A *real* wavelet function returns only a single component and
     can be used to isolate *peaks or discontinuities*.
@@ -175,7 +175,7 @@ class WaveletTransform(object):
     wavelet amplitude.
 
     The resolution of the wavelet function is determined by the
-    balance between the width in real and fourier space.
+    balance between the width in real and Fourier space.
 
     A narrow function in time will have good time resolution but
     poor frequency resolution and vice versa.
@@ -197,10 +197,10 @@ class WaveletTransform(object):
     The peak wavelet response does not necessarily occur at 1 / s.
 
     If we wish to compare wavelet spectra at different scales with
-    each other and with fourier modes, we need a common set of
+    each other and with Fourier modes, we need a common set of
     units.
 
-    The equivalent fourier period is defined as where the wavelet
+    The equivalent Fourier period is defined as where the wavelet
     power spectrum reaches its maximum and can be found analytically.
     """
     def __init__(self, data=None, time=None, dt=1,
@@ -209,7 +209,7 @@ class WaveletTransform(object):
         """Arguments:
             data - 1 dimensional input signal
             time - corresponding times for the input signal
-                   not essential, but the coi will be calculated
+                   not essential, but the COI will be calculated
                    for time starting at zero.
             dt - sample spacing
             dj - scale resolution
@@ -247,14 +247,14 @@ class WaveletTransform(object):
 
     @property
     def fourier_period(self):
-        """Return a function that calculates the equivalent fourier
+        """Return a function that calculates the equivalent Fourier
         period as a function of scale.
         """
         return getattr(self.wavelet, 'fourier_period')
 
     @property
     def fourier_periods(self):
-        """Return the equivalent fourier periods for the scales used."""
+        """Return the equivalent Fourier periods for the scales used."""
         return self.fourier_period(self.scales)
 
     @property
@@ -270,7 +270,7 @@ class WaveletTransform(object):
 
     def find_s0(self):
         """Find the smallest resolvable scale by finding where the
-        equivalent fourier period is equal to 2 * dt. For a Morlet
+        equivalent Fourier period is equal to 2 * dt. For a Morlet
         wavelet, this is roughly 1.
         """
         dt = self.dt
@@ -309,7 +309,7 @@ class WaveletTransform(object):
         choose s0 so that the equivalent Fourier period is 2 * dt.
 
         The choice of dj depends on the width in spectral space of
-        the wavelet function. For the morlet, dj=0.5 is the largest
+        the wavelet function. For the Morlet, dj=0.5 is the largest
         that still adequately samples scale. Smaller dj gives finer
         scale resolution.
         """
@@ -317,7 +317,7 @@ class WaveletTransform(object):
         # resolution
         dj = self.dj
         # smallest resolvable scale, chosen so that the equivalent
-        # fourier period is approximately 2dt
+        # Fourier period is approximately 2dt
         s0 = self.s0
 
         # Largest scale
@@ -329,7 +329,7 @@ class WaveletTransform(object):
     # TODO: use np.frompyfunc on this
     # TODO: can we just replace it with fftfreqs?
     def w_k(self, k=None):
-        """Angular frequency as a function of fourier index.
+        """Angular frequency as a function of Fourier index.
 
         If no k, returns an array of all the angular frequencies
         calculated using the length of the data.
@@ -396,7 +396,7 @@ class WaveletTransform(object):
         x_n = (dj * dt^(1/2)) / (C_d * Y_0(0)) \
                 * Sum_(j=0)^J { Re(W_n(s_j)) / s_j^(1/2) }
 
-        where the factor C_d comes from the recontruction of a delta
+        where the factor C_d comes from the reconstruction of a delta
         function from its wavelet transform using the wavelet
         function Y_0. This C_d is a constant for each wavelet
         function.
@@ -481,7 +481,7 @@ class WaveletTransform(object):
         """Compute the parameter C_delta (see self.C_d), used in
         reconstruction. See section 3.i of TC98.
 
-        FIXME: this doesn't work. TC98 gives 0.776 for the morlet
+        FIXME: this doesn't work. TC98 gives 0.776 for the Morlet
         wavelet with dj=0.125.
         """
         dj = self.dj
@@ -521,7 +521,7 @@ class WaveletTransform(object):
 
         Returns the variance of the input data.
         """
-        # TODO: mask coi for calculation of wavelet_variance
+        # TODO: mask COI for calculation of wavelet_variance
         # is this possible? how does it change the factors?
         dj = self.dj
         dt = self.dt

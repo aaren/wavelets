@@ -46,7 +46,7 @@ def test_DOG():
     npt.assert_almost_equal(wavelets.DOG(m=6).frequency(0), 0, 6)
 
 
-test_data = np.loadtxt('tests/nino3data.asc', skiprows=3)
+test_data = np.loadtxt('nino3data.asc', skiprows=3)
 
 nino_time = test_data[:, 0]
 nino_dt = np.diff(nino_time).mean()
@@ -197,7 +197,7 @@ def test_reconstruction_freq():
 def test_power_bias():
     """See if the global wavelet spectrum is biased or not.
 
-    Wavelet transform a signal of 3 distinct fourier frequencies.
+    Wavelet transform a signal of 3 distinct Fourier frequencies.
 
     The power spectrum should contain peaks at the frequencies, all
     of which should be the same height.
@@ -298,11 +298,11 @@ def test_plot_coi():
     ax.yaxis.set_ticklabels(ticks.astype(str))
     ax.set_ylim(64, 0.5)
 
-    # second y scale with equivalent fourier periods to scales
+    # second y scale with equivalent Fourier periods to scales
     # except with the ticks at the powers of 2
     ax_fourier = ax.twinx()
     ax_fourier.set_yscale('log')
-    # match the fourier ticks to the scale ticks
+    # match the Fourier ticks to the scale ticks
     ax_fourier.set_yticks(ticks)
     ax_fourier.set_yticklabels(ticks.astype(str))
     ax_fourier.set_ylabel('fourier period (years)')
