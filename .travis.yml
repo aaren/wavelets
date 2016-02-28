@@ -3,6 +3,11 @@ language: python
 sudo: false
 
 before_install:
+  # need this for GUI
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+
   # see http://conda.pydata.org/docs/travis.html
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
       wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
