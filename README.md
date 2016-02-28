@@ -87,7 +87,7 @@ wa = WaveletAnalysis(data=x, wavelet=Ricker(), dt=dt)
 
 ### Requirements ###
 
-- Python 2.7
+- Python 2.7+ / 3.4+ (other versions might work but have not been tested)
 - Numpy (developed with 1.7.1)
 - Scipy (developed with 0.12.0)
 
