@@ -10,7 +10,7 @@ and Compo][TC_Home] (BAMS, 1998)
 [TC_home]: http://paos.colorado.edu/research/wavelets/
 [TC_98]: http://paos.colorado.edu/research/wavelets/bams_79_01_0061.pdf
 
-![random data](https://raw.github.com/aaren/wavelets/master/tests/test_coi.png)
+![random data](https://raw.github.com/aaren/wavelets/master/tests/coi_example.png)
 
 
 ### Usage ###
