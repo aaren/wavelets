@@ -1,0 +1,7 @@
+# Python auto generated files
+**/__pycache__
+**/*.pyc
+*.egg-info
+
+# Files as produced by the tests
+tests/test_*.png
