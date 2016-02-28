@@ -331,6 +331,11 @@ def test_fourier_frequencies():
     # Check periods
     npt.assert_array_almost_equal(wa.fourier_periods, 1. / frequencies)
 
+    # Set periods and re-check
+    wa.fourier_periods = 1. / frequencies
+    npt.assert_array_almost_equal(wa.fourier_frequencies, frequencies)
+    npt.assert_array_almost_equal(wa.fourier_periods, 1. / frequencies)
+
 
 def test_multi_dim():
     data = np.random.random((10, 100))
