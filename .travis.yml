@@ -2,6 +2,11 @@ language: python
 
 sudo: false
 
+python:
+  - 2.7
+  - 3.4
+  - 3.5
+
 before_install:
   # need this for GUI
   - "export DISPLAY=:99.0"
@@ -31,8 +36,12 @@ env:
     - CONDA="$HOME/miniconda/bin"
     - PATH="$CONDA:$PATH"
   matrix:
-    - PEP=true
     - PEP=false
+
+matrix:
+  include:
+    - python: 2.7
+      env: PEP=true
 
 install:
   - python setup.py install
