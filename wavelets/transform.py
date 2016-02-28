@@ -270,15 +270,15 @@ class WaveletTransform(object):
         self.scales = self.wavelet.scale_from_period(periods)
 
     @property
-    def frequencies(self):
+    def fourier_frequencies(self):
         """
         Return the equivalent frequencies .
         This is equivalent to 1.0 / self.fourier_periods
         """
         return np.reciprocal(self.fourier_periods)
 
-    @frequencies.setter
-    def frequencies(self, frequencies):
+    @fourier_frequencies.setter
+    def fourier_frequencies(self, frequencies):
         """
         Set the scales based on a list of fourier periods.
         This is equivalent to self.fourier_periods = 1.0 / frequencies
