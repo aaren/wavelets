@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, print_function
 
 from nose.tools import *
 import numpy.testing as npt
