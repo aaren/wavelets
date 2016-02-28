@@ -13,23 +13,6 @@ and Compo][TC_Home] (BAMS, 1998)
 ![random data](https://raw.github.com/aaren/wavelets/master/tests/coi_example.png)
 
 
-### Installation ###
-
-```sh
-pip install git+https://github.com/aaren/wavelets
-```
-
-or install from a local copy:
-```sh
-git clone https://github.com/aaren/wavelets.git
-cd wavelets
-pip install -r requirements.txt
-python setup.py install
-# Optional: Run testsuite
-pip install -r test-requirements.txt
-nosetests
-```
-
 ### Usage ###
 
 ```python
@@ -83,6 +66,23 @@ You specify the function to use when starting the analysis:
 from wavelets import Ricker
 
 wa = WaveletAnalysis(data=x, wavelet=Ricker(), dt=dt)
+```
+
+### Installation ###
+
+```sh
+pip install git+https://github.com/aaren/wavelets
+```
+
+or install from a local copy:
+```sh
+git clone https://github.com/aaren/wavelets.git
+cd wavelets
+pip install -r requirements.txt
+python setup.py install
+# Optional: Run testsuite
+pip install -r test-requirements.txt
+nosetests
 ```
 
 ### Requirements ###
