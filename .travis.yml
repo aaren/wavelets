@@ -1,0 +1,11 @@
+langage: python
+
+python:
+    - "2.7"
+
+before-install:
+    - travis_retry pip install numpy
+    - travis_retry pip install scipy
+    - travis_retry pip install nose
+
+script: nosetests
