@@ -316,6 +316,26 @@ def test_plot_coi():
 
     fig.savefig('tests/test_coi.png')
 
+def test_fourier_frequencies():
+    # Just some signal, no special meaning
+    dt = .1
+    x = np.arange(5000) * dt
+    signal = np.cos(1. * x) + np.cos(2. * x) + np.cos(3. * x)
+
+    wa = WaveletAnalysis(signal, dt=dt,
+                         wavelet=wavelets.Morlet(), unbias=False)
+    # Set frequencies and check if they match when retrieving them again
+    frequencies = np.linspace(1., 100., 100)
+    wa.fourier_frequencies = frequencies
+    npt.assert_array_almost_equal(wa.fourier_frequencies, frequencies)
+    # Check periods
+    npt.assert_array_almost_equal(wa.fourier_periods, 1. / frequencies)
+
+    # Set periods and re-check
+    wa.fourier_periods = 1. / frequencies
+    npt.assert_array_almost_equal(wa.fourier_frequencies, frequencies)
+    npt.assert_array_almost_equal(wa.fourier_periods, 1. / frequencies)
+
 
 def test_multi_dim():
     data = np.random.random((10, 100))

@@ -253,9 +253,37 @@ class WaveletTransform(object):
         return getattr(self.wavelet, 'fourier_period')
 
     @property
+    def scale_from_period(self):
+        """Return a function that calculates the wavelet scale
+        from the fourier period
+        """
+        return getattr(self.wavelet, 'scale_from_period')
+
+    @property
     def fourier_periods(self):
         """Return the equivalent Fourier periods for the scales used."""
         return self.fourier_period(self.scales)
+
+    @fourier_periods.setter
+    def fourier_periods(self, periods):
+        """Set the scales based on a list of fourier periods"""
+        self.scales = self.wavelet.scale_from_period(periods)
+
+    @property
+    def fourier_frequencies(self):
+        """
+        Return the equivalent frequencies .
+        This is equivalent to 1.0 / self.fourier_periods
+        """
+        return np.reciprocal(self.fourier_periods)
+
+    @fourier_frequencies.setter
+    def fourier_frequencies(self, frequencies):
+        """
+        Set the scales based on a list of fourier periods.
+        This is equivalent to self.fourier_periods = 1.0 / frequencies
+        """
+        self.fourier_periods = np.reciprocal(frequencies)
 
     @property
     def s0(self):
