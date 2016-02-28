@@ -1,6 +1,9 @@
 Continuous wavelet transforms in Python.
 ----------------------------------------
 
+<a href='https://travis-ci.org/aaren/wavelets'>
+<img src='https://secure.travis-ci.org/aaren/wavelets.png?branch=master'></a>
+
 A Clean Python implementation of the wavelet analysis outlined in [Torrence
 and Compo][TC_Home] (BAMS, 1998)
 
