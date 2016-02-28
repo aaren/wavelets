@@ -507,7 +507,7 @@ class WaveletTransform(object):
         WK, S = np.meshgrid(self.w_k(), self.scales)
 
         # compute Y_ over all s, w_k and sum over k
-        norm = (2 * np.pi * S / self.dt) ** .5  # normalisation factor with dt=1
+        norm = (2 * np.pi * S / self.dt) ** .5
         W_d = (1 / self.N) * np.sum(norm * Y_0(WK, S), axis=1)
 
         # N.B This W_d is 1D (defined only at n=0)
