@@ -18,7 +18,7 @@ before_install:
   - conda info -a
 
   # Replace dep1 dep2 ... with your dependencies
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION nose numpy scipy matplotlib pep8 pyflakes
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION nose numpy scipy matplotlib pep8
   - source activate test-environment
 
 env:
@@ -34,5 +34,4 @@ install:
 
 script:
     - if $PEP; then pep8 wavelets; fi
-    - if $PEP; then pyflakes wavelets; fi
     - if ! $PEP; then nosetests; fi
