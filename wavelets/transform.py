@@ -393,7 +393,7 @@ class WaveletTransform(object):
         elif not self.unbias:
             return np.abs(self.wavelet_transform) ** 2
 
-    def reconstruction(self, scales=None):
+    def reconstruction(self, scales=None, wave=None):
         """Reconstruct the original signal from the wavelet
         transform. See S3.i.
 
@@ -411,6 +411,8 @@ class WaveletTransform(object):
         function from its wavelet transform using the wavelet
         function Y_0. This C_d is a constant for each wavelet
         function.
+
+        :param wave: custom wavelet_transform array for reconstructing a signal omitting some frequencies, if desired.
         """
         dj = self.dj
         dt = self.dt
@@ -421,7 +423,10 @@ class WaveletTransform(object):
             self.scales = scales
 
         s = self.scales
-        W_n = self.wavelet_transform
+        if wave is None:
+            W_n = self.wavelet_transform
+        else:
+            W_n = wave
 
         if scales is not None:
             self.scales = old_scales
