@@ -367,6 +367,16 @@ class WaveletTransform(object):
 
     @property
     def wavelet_transform(self):
+        if not hasattr(self, '_wavelet_transform'):
+            return self.transform()
+        else:
+            return self._wavelet_transform
+
+    @wavelet_transform.setter
+    def wavelet_transform(self, value):
+        setattr(self, '_wavelet_transform', value)
+
+    def transform(self):
         """Calculate the wavelet transform."""
         widths = self.scales
 
@@ -375,12 +385,14 @@ class WaveletTransform(object):
         else:
             wavelet = self.wavelet.time
 
-        return self.cwt(self.anomaly_data,
-                        wavelet=wavelet,
-                        widths=widths,
-                        dt=self.dt,
-                        frequency=self.frequency,
-                        axis=self.axis)
+        self.wavelet_transform = self.cwt(self.anomaly_data,
+                                          wavelet=wavelet,
+                                          widths=widths,
+                                          dt=self.dt,
+                                          frequency=self.frequency,
+                                          axis=self.axis)
+
+        return self.wavelet_transform
 
     @property
     def wavelet_power(self):
