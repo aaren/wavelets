@@ -186,7 +186,12 @@ class Paul(object):
         return 4 * np.pi * s / (2 * self.m + 1)
 
     def scale_from_period(self, period):
-        raise NotImplementedError()
+        """
+        Compute the scale from the fourier period.
+        Returns the scale
+        """
+        # Solve 4 * np.pi * scale / (2 * m + 1) for s
+        return period * (2 * self.m + 1) / (4 * np.pi)        
 
     # Frequency representation
     def frequency(self, w, s=1.0):
@@ -313,7 +318,12 @@ class DOG(object):
         return 2 * np.pi * s / (self.m + 0.5) ** .5
 
     def scale_from_period(self, period):
-        raise NotImplementedError()
+        """
+        Compute the scale from the fourier period.
+        Returns the scale
+        """
+        # Solve 2 * np.pi * s / (np.sqrt(m + 1/2)) for s
+        return period * np.sqrt(self.m + 0.5) / (2 * np.pi)
 
     def frequency(self, w, s=1.0):
         """Frequency representation of derivative of Gaussian.
