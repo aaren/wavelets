@@ -92,6 +92,7 @@ def cwt_time(data, wavelet, widths, dt, axis):
     # compute in time
     slices = [None for _ in data.shape]
     slices[axis] = slice(None)
+    slices = tuple(slices)
     for ind, width in enumerate(widths):
         # number of points needed to capture wavelet
         M = 10 * width / dt
