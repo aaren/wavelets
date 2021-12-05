@@ -573,7 +573,7 @@ class WaveletTransform(object):
 
         return sC, sS
 
-    def plot_power(self, ax=None, coi=True):
+    def plot_power(self, ax=None, coi=True, cmap = 'viridis'):
         """Create a basic wavelet power plot with time on the
         x-axis, scale on the y-axis, and a cone of influence
         overlaid.
@@ -586,7 +586,7 @@ class WaveletTransform(object):
             fig, ax = plt.subplots()
 
         Time, Scale = np.meshgrid(self.time, self.scales)
-        ax.contourf(Time, Scale, self.wavelet_power, 100)
+        ax.contourf(Time, Scale, self.wavelet_power, 100, cmap = cmap)
 
         ax.set_yscale('log')
         ax.grid(True)

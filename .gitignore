@@ -5,3 +5,5 @@
 
 # Files as produced by the tests
 tests/test_*.png
+wavelets/transform.py
+wavelets/wavelets.py
